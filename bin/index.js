@@ -18,29 +18,37 @@ const config = require('./config/config.default');
 const port = 3000;
 
 function getIpAddress() {
-    var ifaces = os.networkInterfaces()
-    for (var dev in ifaces) {
-        let iface = ifaces[dev]
-        for (let i = 0; i < iface.length; i++) {
-            let { family, address, internal } = iface[i]
-            if (family === 'IPv4' && address !== '127.0.0.1' && !internal) {
-                return address
+    try {
+        var ifaces = os.networkInterfaces()
+        for (var dev in ifaces) {
+            let iface = ifaces[dev]
+            for (let i = 0; i < iface.length; i++) {
+                let { family, address, internal } = iface[i]
+                if (family === 'IPv4' && address !== '127.0.0.1' && !internal) {
+                    return address
+                }
             }
         }
+    } catch (error) {
+        console.log(error);
     }
 }
 
 const middlewareNacos = async(req, res, next) => {
-    const nacosConfig = config().nacos;
-    const serviceConfig = config().service;
-    const ipAddress = getIpAddress();
-    const client = new nacos.NacosNamingClient(nacosConfig);
-    const serviceName = serviceConfig.debug ? nacosConfig.debugServiceName : (serviceConfig.readOnly ? nacosConfig.readOnlyServiceName : nacosConfig.serviceName);
-    await client.ready();
-    await client.registerInstance(serviceName, {
-        ip: ipAddress,
-        port: port || 3000,
-    });
+    try {
+        const nacosConfig = config().nacos;
+        const serviceConfig = config().service;
+        const ipAddress = getIpAddress();
+        const client = new nacos.NacosNamingClient(nacosConfig);
+        const serviceName = serviceConfig.debug ? nacosConfig.debugServiceName : (serviceConfig.readOnly ? nacosConfig.readOnlyServiceName : nacosConfig.serviceName);
+        await client.ready();
+        await client.registerInstance(serviceName, {
+            ip: ipAddress,
+            port: port || 3000,
+        });
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 function startXmysql(sqlConfig) {
@@ -82,31 +90,35 @@ function startXmysql(sqlConfig) {
 }
 
 function start(sqlConfig) {
-    //handle cmd line arguments
-    cmdargs.handle(sqlConfig);
+    try {
+        //handle cmd line arguments
+        cmdargs.handle(sqlConfig);
 
-    if (cluster.isMaster && sqlConfig.useCpuCores > 1) {
-        console.log(`Master ${process.pid} is running`);
+        if (cluster.isMaster && sqlConfig.useCpuCores > 1) {
+            console.log(`Master ${process.pid} is running`);
 
-        for (let i = 0; i < numCPUs && i < sqlConfig.useCpuCores; i++) {
-            console.log(`Forking process number ${i}...`);
-            cluster.fork();
+            for (let i = 0; i < numCPUs && i < sqlConfig.useCpuCores; i++) {
+                console.log(`Forking process number ${i}...`);
+                cluster.fork();
+            }
+
+            cluster.on("exit", function(worker, code, signal) {
+                console.log(
+                    "Worker " +
+                    worker.process.pid +
+                    " died with code: " +
+                    code +
+                    ", and signal: " +
+                    signal
+                );
+                console.log("Starting a new worker");
+                cluster.fork();
+            });
+        } else {
+            startXmysql(sqlConfig);
         }
-
-        cluster.on("exit", function(worker, code, signal) {
-            console.log(
-                "Worker " +
-                worker.process.pid +
-                " died with code: " +
-                code +
-                ", and signal: " +
-                signal
-            );
-            console.log("Starting a new worker");
-            cluster.fork();
-        });
-    } else {
-        startXmysql(sqlConfig);
+    } catch (error) {
+        console.log(error);
     }
 }
 
