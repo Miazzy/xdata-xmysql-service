@@ -1,0 +1,51 @@
+{
+    "name": "xdata-xmysql-service",
+    "version": "1.0.1",
+    "description": "Generate REST APIs for any MySql database 读写RestAPI服务",
+    "main": "index.js",
+    "scripts": {
+        "start": "node ./bin/index.js -u zhaoziyun -p ziyequma -d xdata -h 172.18.254.95 -o 39090 -n 3000",
+        "test": "./node_modules/.bin/mocha tests/*.js --exit"
+    },
+    "keywords": [
+        "mysql-rest-api-generator",
+        "node-mysql-rest-api",
+        "rest",
+        "restful",
+        "rest-apis"
+    ],
+    "engines": {
+        "node": ">= 7.6.0"
+    },
+    "bin": {
+        "xmysqls": "bin/index.js"
+    },
+    "repository": "miazzy/xmysql",
+    "homepage": "https://github.com/Miazzy/xmysql",
+    "author": "Miazzy",
+    "license": "MIT",
+    "dependencies": {
+        "assert": "^1.4.1",
+        "body-parser": "^1.18.2",
+        "cluster": "^0.7.7",
+        "colors": "^1.1.2",
+        "commander": "^2.11.0",
+        "cors": "^2.8.4",
+        "express": "^4.16.1",
+        "morgan": "^1.9.0",
+        "multer": "^1.3.0",
+        "mysql": "^2.18.1",
+        "nacos": "^2.0.1",
+        "request-ip": "^2.1.3"
+    },
+    "devDependencies": {
+        "eslint-config-airbnb-base": "^13.1.0",
+        "eslint-config-prettier": "^4.1.0",
+        "eslint-plugin-import": "^2.16.0",
+        "eslint-plugin-prettier": "^3.0.1",
+        "mocha": "^5.2.0",
+        "should": "^13.1.2",
+        "sleep": "^6.1.0",
+        "supertest": "^3.0.0"
+    }
+}
