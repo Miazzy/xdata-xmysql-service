@@ -1,5 +1,5 @@
 {
-    "name": "xdata-xmysql-service",
+    "name": "xmysqls",
     "version": "1.0.1",
     "description": "Generate REST APIs for any MySql database 读写RestAPI服务",
     "main": "index.js",
