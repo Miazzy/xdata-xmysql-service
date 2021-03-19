@@ -54,6 +54,8 @@ const middlewareNacos = async(req, res, next) => {
 
 function startXmysql(sqlConfig) {
 
+    const protectConfig = config().protect;
+
     //注册Nacos并发布服务，服务名称：xdata-xmysql-service
     middlewareNacos();
 
@@ -69,16 +71,19 @@ function startXmysql(sqlConfig) {
         })
     );
     // 新增防止SQL注入检测
-    app.use(protect.express.sqlInjection({
-        body: true,
-        loggerFunction: console.error
-    }));
+    if (protectConfig.sqlInjection) {
+        app.use(protect.express.sqlInjection({
+            body: true,
+            loggerFunction: console.error
+        }));
+    }
     // 新增防止XSS跨站攻击
-    app.use(protect.express.xss({
-        body: true,
-        loggerFunction: console.error
-    }));
-
+    if (protectConfig.xss) {
+        app.use(protect.express.xss({
+            body: true,
+            loggerFunction: console.error
+        }));
+    }
     /** pretect限流功能 ， client是redis client
      const redis = require('redis')
      const client = redis.createClient();

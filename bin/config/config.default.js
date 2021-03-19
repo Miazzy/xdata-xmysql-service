@@ -32,6 +32,11 @@ module.exports = () => {
         db: 0,
     };
 
+    config.protect = {
+        sqlInjection: false,
+        xss: true,
+    };
+
     config.service = {
         host: '172.18.254.95', // hostname of database / localhost by default "-h, --host <n>"
         port: '39090', // port number for mysql / 3306 by default "-o, --port <n>"
