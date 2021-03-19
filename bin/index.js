@@ -3,6 +3,7 @@
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const express = require("express");
+const protect = require('@risingstack/protect');
 const sqlConfig = require("commander");
 const mysql = require("mysql");
 const cors = require("cors");
