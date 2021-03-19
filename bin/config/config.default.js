@@ -24,6 +24,14 @@ module.exports = () => {
         readOnlyServiceName: 'xdata-rmysql-service', //只读模式
     };
 
+    config.redis = {
+        host: '172.18.254.95',
+        port: 36379,
+        family: 4, // 4 (IPv4) or 6 (IPv6)
+        password: "",
+        db: 0,
+    };
+
     config.service = {
         host: '172.18.254.95', // hostname of database / localhost by default "-h, --host <n>"
         port: '39090', // port number for mysql / 3306 by default "-o, --port <n>"
@@ -39,7 +47,7 @@ module.exports = () => {
         debug: false, // 是否开启调试模式
         readOnly: false, // readonly apis / false by default "-y, --readOnly"
         useCpuCores: '0', // use number of CPU cores (using cluster) / 1 by default "-c, --useCpuCores <n>"
-    }
+    };
 
     return {
         ...config,
