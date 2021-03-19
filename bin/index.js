@@ -58,6 +58,7 @@ function startXmysql(sqlConfig) {
 
     /**************** START : setup express ****************/
     let app = express();
+
     app.use(morgan("tiny"));
     app.use(cors());
     app.use(bodyParser.json());
@@ -66,6 +67,37 @@ function startXmysql(sqlConfig) {
             extended: true
         })
     );
+    // 新增防止SQL注入检测
+    app.use(protect.express.sqlInjection({
+        body: true,
+        loggerFunction: console.error
+    }));
+    // 新增防止XSS跨站攻击
+    app.use(protect.express.xss({
+        body: true,
+        loggerFunction: console.error
+    }));
+
+    /** pretect限流功能 ， client是redis client
+     const redis = require('redis')
+     const client = redis.createClient();
+     app.use(protect.express.rateLimiter({
+         db: client,
+         id: (request) => request.connection.remoteAddress
+     }));
+     app.get('/', (request, response) => {
+         response.send('hello protect!')
+     });
+     app.post('/login', protect.express.rateLimiter({
+         db: client,
+         id: (request) => request.body.email,
+         // max 10 tries per 2 minutes
+         max: 10,
+         duration: 120000
+     }), (request, response) => {
+         response.send('wuut logged in')
+     });
+     */
     /**************** END : setup express ****************/
 
     /**************** START : setup mysql ****************/

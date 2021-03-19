@@ -25,6 +25,7 @@
     "author": "Miazzy",
     "license": "MIT",
     "dependencies": {
+        "@risingstack/protect": "^1.2.0",
         "assert": "^1.4.1",
         "body-parser": "^1.18.2",
         "cluster": "^0.7.7",
