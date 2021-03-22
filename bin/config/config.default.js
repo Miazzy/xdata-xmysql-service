@@ -32,6 +32,81 @@ module.exports = () => {
         db: 0,
     };
 
+    config.redisclustr = {
+        servers: [{
+            host: '172.18.1.104',
+            port: 7002,
+            password: '1234567890',
+            db: 0,
+        }, {
+            host: '172.18.1.104',
+            port: 7003,
+            password: '1234567890',
+            db: 0,
+        }, {
+            host: '172.18.1.104',
+            port: 7004,
+            password: '1234567890',
+            db: 0,
+        }, {
+            host: '172.18.1.104',
+            port: 7005,
+            password: '1234567890',
+            db: 0,
+        }, {
+            host: '172.18.1.104',
+            port: 7006,
+            password: '1234567890',
+            db: 0,
+        }, {
+            host: '172.18.1.104',
+            port: 7007,
+            password: '1234567890',
+            db: 0,
+        }, {
+            host: '172.18.1.50',
+            port: 7002,
+            password: '1234567890',
+            db: 0,
+        }, {
+            host: '172.18.1.50',
+            port: 7003,
+            password: '1234567890',
+            db: 0,
+        }, {
+            host: '172.18.1.50',
+            port: 7004,
+            password: '1234567890',
+            db: 0,
+        }, {
+            host: '172.18.1.50',
+            port: 7005,
+            password: '1234567890',
+            db: 0,
+        }, {
+            host: '172.18.1.50',
+            port: 7006,
+            password: '1234567890',
+            db: 0,
+        }, {
+            host: '172.18.1.50',
+            port: 7007,
+            password: '1234567890',
+            db: 0,
+        }],
+        slotInterval: 1000, // default: none. Interval to repeatedly re-fetch cluster slot configuration
+        maxQueueLength: 100, // default: no limit. Maximum length of the getSlots queue (basically number of commands that can be queued whilst connecting to the cluster)
+        queueShift: false, // default: true. Whether to shift the getSlots callback queue when it's at max length (error oldest callback), or to error on the new callback
+        wait: 5000, // default: no timeout. Max time to wait to connect to cluster before sending an error to all getSlots callbacks
+        slaves: 'share', // default: 'never'. How to direct readOnly commands: 'never' to use masters only, 'share' to distribute between masters and slaves or 'always' to  only use slaves (if available)
+        createClient: function(port, host, options) {
+            return require('redis').createClient(port, host, options);
+        },
+        redisOptions: {
+            retry_max_delay: 500
+        }
+    }
+
     config.protect = {
         sqlInjection: false,
         xss: true,

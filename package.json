@@ -38,6 +38,8 @@
         "multer": "^1.3.0",
         "mysql": "^2.18.1",
         "nacos": "^2.0.1",
+        "redis": "^2.8.0",
+        "redis-clustr": "^1.7.0",
         "request-ip": "^2.1.3"
     },
     "devDependencies": {
