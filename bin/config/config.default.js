@@ -34,41 +34,8 @@ module.exports = () => {
 
     config.redisclustr = {
         servers: [{
-            host: '172.18.1.104',
-            port: 7002,
-        }, {
-            host: '172.18.1.104',
-            port: 7003,
-        }, {
-            host: '172.18.1.104',
-            port: 7004,
-        }, {
-            host: '172.18.1.104',
-            port: 7005,
-        }, {
-            host: '172.18.1.104',
-            port: 7006,
-        }, {
-            host: '172.18.1.104',
-            port: 7007,
-        }, {
-            host: '172.18.1.50',
-            port: 7002,
-        }, {
-            host: '172.18.1.50',
-            port: 7003,
-        }, {
-            host: '172.18.1.50',
-            port: 7004,
-        }, {
-            host: '172.18.1.50',
-            port: 7005,
-        }, {
-            host: '172.18.1.50',
-            port: 7006,
-        }, {
-            host: '172.18.1.50',
-            port: 7007,
+            host: '172.18.254.95',
+            port: 37000,
         }],
         slotInterval: 1000, // default: none. Interval to repeatedly re-fetch cluster slot configuration
         maxQueueLength: 100, // default: no limit. Maximum length of the getSlots queue (basically number of commands that can be queued whilst connecting to the cluster)
