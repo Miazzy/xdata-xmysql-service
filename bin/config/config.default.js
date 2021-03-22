@@ -36,63 +36,39 @@ module.exports = () => {
         servers: [{
             host: '172.18.1.104',
             port: 7002,
-            password: '1234567890',
-            db: 0,
         }, {
             host: '172.18.1.104',
             port: 7003,
-            password: '1234567890',
-            db: 0,
         }, {
             host: '172.18.1.104',
             port: 7004,
-            password: '1234567890',
-            db: 0,
         }, {
             host: '172.18.1.104',
             port: 7005,
-            password: '1234567890',
-            db: 0,
         }, {
             host: '172.18.1.104',
             port: 7006,
-            password: '1234567890',
-            db: 0,
         }, {
             host: '172.18.1.104',
             port: 7007,
-            password: '1234567890',
-            db: 0,
         }, {
             host: '172.18.1.50',
             port: 7002,
-            password: '1234567890',
-            db: 0,
         }, {
             host: '172.18.1.50',
             port: 7003,
-            password: '1234567890',
-            db: 0,
         }, {
             host: '172.18.1.50',
             port: 7004,
-            password: '1234567890',
-            db: 0,
         }, {
             host: '172.18.1.50',
             port: 7005,
-            password: '1234567890',
-            db: 0,
         }, {
             host: '172.18.1.50',
             port: 7006,
-            password: '1234567890',
-            db: 0,
         }, {
             host: '172.18.1.50',
             port: 7007,
-            password: '1234567890',
-            db: 0,
         }],
         slotInterval: 1000, // default: none. Interval to repeatedly re-fetch cluster slot configuration
         maxQueueLength: 100, // default: no limit. Maximum length of the getSlots queue (basically number of commands that can be queued whilst connecting to the cluster)
