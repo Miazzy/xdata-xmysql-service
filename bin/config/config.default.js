@@ -99,7 +99,9 @@ module.exports = () => {
         queueShift: false, // default: true. Whether to shift the getSlots callback queue when it's at max length (error oldest callback), or to error on the new callback
         wait: 5000, // default: no timeout. Max time to wait to connect to cluster before sending an error to all getSlots callbacks
         slaves: 'share', // default: 'never'. How to direct readOnly commands: 'never' to use masters only, 'share' to distribute between masters and slaves or 'always' to  only use slaves (if available)
-        createClient: function(port, host, options) {
+        createClient: function(port, host, options = {}) {
+            options.password = '1234567890';
+            options.db = 0;
             return require('redis').createClient(port, host, options);
         },
         redisOptions: {
