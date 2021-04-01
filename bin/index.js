@@ -125,8 +125,6 @@ function startXmysql(sqlConfig) {
     /**************** END : setup mysql ****************/
 
     /**************** START : setup Xapi ****************/
-    console.log("Generating REST APIs at the speed of your thought...");
-
     let t = process.hrtime();
     let moreApis = new Xapi(sqlConfig, mysqlPool, app);
 
@@ -134,9 +132,7 @@ function startXmysql(sqlConfig) {
         app.listen(sqlConfig.portNumber, sqlConfig.ipAddress);
         var t1 = process.hrtime(t);
         var t2 = t1[0] + t1[1] / 1000000000;
-        console.log("       API's base URL    :   localhost:" + sqlConfig.portNumber);
-        console.log("                                                            ");
-        console.log(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+        console.log("          API's base URL    :   localhost:" + sqlConfig.portNumber);
     });
     /**************** END : setup Xapi ****************/
 }
