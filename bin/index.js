@@ -18,6 +18,10 @@ const os = require('os');
 const config = require('./config/config.default');
 const port = 3000;
 
+/**
+ * 获取本地服务内网IP地址，注册服务时需使用
+ * @returns 
+ */
 function getIpAddress() {
     try {
         var ifaces = os.networkInterfaces()
@@ -35,6 +39,12 @@ function getIpAddress() {
     }
 }
 
+/**
+ * Nacos配置注册服务中间件（注册微服务）
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
 const middlewareNacos = async(req, res, next) => {
     try {
         const nacosConfig = config().nacos;
@@ -52,6 +62,10 @@ const middlewareNacos = async(req, res, next) => {
     }
 }
 
+/**
+ * Express服务启动函数
+ * @param {*} sqlConfig 
+ */
 function startXmysql(sqlConfig) {
 
     const protectConfig = config().protect;
@@ -127,6 +141,10 @@ function startXmysql(sqlConfig) {
     /**************** END : setup Xapi ****************/
 }
 
+/**
+ * 获取命令行参数，并根据参数启动服务(Cluster模式)函数
+ * @param {*} sqlConfig 
+ */
 function start(sqlConfig) {
     try {
         //handle cmd line arguments
@@ -160,4 +178,5 @@ function start(sqlConfig) {
     }
 }
 
+// 启动HTTP服务
 start(sqlConfig);
