@@ -130,8 +130,6 @@ function startXmysql(sqlConfig) {
 
     moreApis.init((err, results) => {
         app.listen(sqlConfig.portNumber, sqlConfig.ipAddress);
-        var t1 = process.hrtime(t);
-        var t2 = t1[0] + t1[1] / 1000000000;
         console.log("          API's base URL    :   localhost:" + sqlConfig.portNumber);
     });
     /**************** END : setup Xapi ****************/
@@ -143,10 +141,12 @@ function startXmysql(sqlConfig) {
  */
 function start(sqlConfig) {
     try {
+
         //handle cmd line arguments
         cmdargs.handle(sqlConfig);
 
         if (cluster.isMaster && sqlConfig.useCpuCores > 1) {
+
             console.log(`Master ${process.pid} is running`);
 
             for (let i = 0; i < numCPUs && i < sqlConfig.useCpuCores; i++) {
@@ -155,20 +155,15 @@ function start(sqlConfig) {
             }
 
             cluster.on("exit", function(worker, code, signal) {
-                console.log(
-                    "Worker " +
-                    worker.process.pid +
-                    " died with code: " +
-                    code +
-                    ", and signal: " +
-                    signal
-                );
+                console.log(`Worker ${worker.process.pid} died with code: ${code} , and signal: ${signal} `);
                 console.log("Starting a new worker");
                 cluster.fork();
             });
+
         } else {
             startXmysql(sqlConfig);
         }
+
     } catch (error) {
         console.log(error);
     }

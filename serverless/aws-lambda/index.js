@@ -1,24 +1,3 @@
-/**
- * I was able to get xmysql to work on AWS lambda. This is just some docs on the process to help others.
- * AWS setup notes:
- * * The deploy uses serverless: https://serverless.com/framework/docs/getting-started/
- * * The lambda function is accessed through API Gateway and access the RDS (mysql) database
- * ** Make sure you deploy your API Gateway setup otherwise it won't be accessible.
- * * The security setup:
- * ** You need to put your lambda in a VPC
- * ** The lambda role needs access to the VPC
- * ** The RDS server has to be inside the VPC as well
- *
- * Performance:
- * * Requests to the API Gateway resolve in ~ 90ms
- *
- * Extra packages needed:
- * * serverless-http
- *
- * More info on deploying this to lambda:
- * * https://serverless.com/blog/serverless-express-rest-api/
- */
-
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var bodyParser = require("body-parser");
