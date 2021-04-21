@@ -15,7 +15,7 @@ const numCPUs = require("os").cpus().length;
 const requestIp = require('request-ip');
 const nacos = require('nacos');
 const os = require('os');
-const config = require('./config/config.default');
+const config = require('./config/config');
 const port = 3000;
 
 /**
