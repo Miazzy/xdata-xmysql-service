@@ -50,7 +50,7 @@ module.exports = () => {
         redisOptions: {
             retry_max_delay: 500
         }
-    }
+    };
 
     config.protect = {
         sqlInjection: false,
@@ -73,6 +73,7 @@ module.exports = () => {
         readOnly: false, // readonly apis / false by default "-y, --readOnly"
         useCpuCores: '0', // use number of CPU cores (using cluster) / 1 by default "-c, --useCpuCores <n>"
         commonCacheTime: 1.5,
+        dblitepath: '/Users/yunwisdom/Workspace/xdata/xdata-xmysql-service/database/db.sqlite',
     };
 
     config.slaves = {
@@ -94,7 +95,7 @@ module.exports = () => {
 
     config.memorycache = {
         cacheddl: {
-            'bs_seal_regist': `CREATE TABLE bs_seal_regist
+            'bs_seal_regist': `CREATE TABLE IF NOT EXISTS bs_seal_regist
             (
                 id                  varchar(36)                            not null  primary key,
                 create_by           varchar(128)                           null ,

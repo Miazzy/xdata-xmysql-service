@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 const morgan = require("morgan");
+const dblite = require('dblite');
 const bodyParser = require("body-parser");
 const express = require("express");
 const protect = require('@risingstack/protect');
@@ -17,6 +18,11 @@ const nacos = require('nacos');
 const os = require('os');
 const config = require('./config/config');
 const port = 3000;
+
+const sqliteDB = dblite(config().service.dblitepath);
+const memoryDB = dblite(':memory:');
+
+console.log(`dblitepath:`, config().service.dblitepath);
 
 /**
  * 获取本地服务内网IP地址，注册服务时需使用
@@ -37,6 +43,23 @@ function getIpAddress() {
     } catch (error) {
         console.log(error);
     }
+}
+
+/**
+ * 初始化sqliteDB
+ */
+function initSqliteDB() {
+    const cacheddl = config().memorycache.cacheddl;
+    console.log(`cache ddl #bs_seal_regist# :`, cacheddl);
+    const keys = Object.keys(cacheddl);
+    for (tableName of keys) {
+        sqliteDB.query(cacheddl[tableName]);
+        memoryDB.query(cacheddl[tableName]);
+    }
+
+    (async() => { //拉取数据库数据
+
+    })();
 }
 
 /**
@@ -84,6 +107,7 @@ function startXmysql(sqlConfig) {
             extended: true
         })
     );
+
     // 新增防止SQL注入检测
     if (protectConfig.sqlInjection) {
         app.use(protect.express.sqlInjection({
@@ -135,6 +159,8 @@ function startXmysql(sqlConfig) {
     /**************** END : setup Xapi ****************/
 
     //启动本地sqlite，创建表，执行同步语句
+    initSqliteDB(); //启动Sqlite本地缓存
+
 }
 
 /**
