@@ -151,7 +151,7 @@ function startXmysql(sqlConfig) {
 
     /**************** START : setup Xapi ****************/
     let t = process.hrtime();
-    let moreApis = new Xapi(sqlConfig, mysqlPool, app);
+    let moreApis = new Xapi(sqlConfig, mysqlPool, app, sqliteDB, memoryDB);
 
     moreApis.init((err, results) => {
         app.listen(sqlConfig.portNumber, sqlConfig.ipAddress);
