@@ -165,7 +165,7 @@ module.exports = () => {
                 update_time         timestamp    default CURRENT_TIMESTAMP  null
             )`,
         },
-    }
+    };
 
     return {
         ...config,
