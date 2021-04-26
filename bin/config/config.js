@@ -72,7 +72,7 @@ module.exports = () => {
         debug: false, // 是否开启调试模式
         readOnly: false, // readonly apis / false by default "-y, --readOnly"
         useCpuCores: '0', // use number of CPU cores (using cluster) / 1 by default "-c, --useCpuCores <n>"
-        commonCacheTime: 0.5,
+        commonCacheTime: 1,
         dblitepath: './database/db.sqlite',
     };
 
