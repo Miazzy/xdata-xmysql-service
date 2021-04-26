@@ -72,8 +72,8 @@ module.exports = () => {
         debug: false, // 是否开启调试模式
         readOnly: false, // readonly apis / false by default "-y, --readOnly"
         useCpuCores: '0', // use number of CPU cores (using cluster) / 1 by default "-c, --useCpuCores <n>"
-        commonCacheTime: 1.5,
-        dblitepath: '/Users/yunwisdom/Workspace/xdata/xdata-xmysql-service/database/db.sqlite',
+        commonCacheTime: 0.5,
+        dblitepath: './database/db.sqlite',
     };
 
     config.slaves = {

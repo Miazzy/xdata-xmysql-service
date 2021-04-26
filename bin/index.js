@@ -19,10 +19,11 @@ const os = require('os');
 const config = require('./config/config');
 const port = 3000;
 
-const sqliteDB = dblite(config().service.dblitepath);
+const sqlitePath = `${process.cwd()}/` + config().service.dblitepath;
+const sqliteDB = dblite(sqlitePath);
 const memoryDB = dblite(':memory:');
 
-console.log(`dblitepath:`, config().service.dblitepath);
+console.log(`dblitepath:`, sqlitePath);
 
 /**
  * 获取本地服务内网IP地址，注册服务时需使用
@@ -50,7 +51,7 @@ function getIpAddress() {
  */
 function initSqliteDB() {
     const cacheddl = config().memorycache.cacheddl;
-    console.log(`cache ddl #bs_seal_regist# :`, cacheddl);
+    console.log(`cache ddl #init# :`, cacheddl);
     const keys = Object.keys(cacheddl);
     for (tableName of keys) {
         sqliteDB.query(cacheddl[tableName]);
