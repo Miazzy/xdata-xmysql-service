@@ -133,6 +133,8 @@ function startXmysql(sqlConfig) {
         console.log("          API's base URL    :   localhost:" + sqlConfig.portNumber);
     });
     /**************** END : setup Xapi ****************/
+
+    //启动本地sqlite，创建表，执行同步语句
 }
 
 /**

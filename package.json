@@ -34,6 +34,7 @@
         "cors": "^2.8.4",
         "dblite": "^1.1.4",
         "express": "^4.16.1",
+        "forerunnerdb": "^2.0.22",
         "ioredis": "^4.24.2",
         "morgan": "^1.9.0",
         "multer": "^1.3.0",
