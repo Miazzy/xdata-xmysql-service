@@ -53,6 +53,7 @@ function initSqliteDB() {
     const cacheddl = config().memorycache.cacheddl;
     console.log(`cache ddl #init# :`, cacheddl);
     const keys = Object.keys(cacheddl);
+
     for (tableName of keys) {
         sqliteDB.query(cacheddl[tableName]);
         memoryDB.query(cacheddl[tableName]);
