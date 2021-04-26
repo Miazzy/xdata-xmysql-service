@@ -22,6 +22,10 @@ module.exports = () => {
         serviceName: 'xdata-xmysql-service', //正常模式
         debugServiceName: 'xdata-dmysql-service', //Debug模式
         readOnlyServiceName: 'xdata-rmysql-service', //只读模式
+        sofaRpcPort: 3020, //sofa-rpc-node 微服务暴露端口
+        sofaInterfaceName: 'xdata.xmysql.service', //sofa-rpc-node 微服务接口名称
+        sofaZookeeperAddress: '127.0.0.1:2181', //sofa-rpc-node 微服务注册地址
+        sofaRegistryName: 'none', //none表示不启用Zookeeper的注册中心 
     };
 
     config.redis = {
@@ -47,9 +51,7 @@ module.exports = () => {
             options.db = 0;
             return require('redis').createClient(port, host, options);
         },
-        redisOptions: {
-            retry_max_delay: 500
-        }
+        redisOptions: {}
     };
 
     config.protect = {
