@@ -122,6 +122,7 @@ function startXmysql(sqlConfig) {
             loggerFunction: console.error
         }));
     }
+
     /** pretect限流功能 ， client是redis client
      const redis = require('redis')
      const client = redis.createClient();
