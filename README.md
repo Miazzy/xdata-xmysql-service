@@ -1,41 +1,31 @@
-![npm version](https://img.shields.io/node/v/xmysql.svg)
-[![Build Status](https://travis-ci.org/o1lab/xmysql.svg?branch=master)](https://travis-ci.org/o1lab/xmysql)
-[![GitHub stars](https://img.shields.io/github/stars/o1lab/xmysql.svg?style=plastic)](https://github.com/o1lab/xmysql/stargazers)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/o1lab/xmysql/master/LICENSE)
+# Xsql : One command to generate REST APIs for any MySql/PostgreSQL/Oracle/Sqlite database
 
-# Xmysql : One command to generate REST APIs for any MySql database
+## Why this ?
 
-# Why this ?
-<p align="center">
-  <img src="./assets/rick-and-morty.gif" alt="xmysql gif"/>
-</p>
 
-Generating REST APIs for a MySql database which does not follow conventions of 
+Generating REST APIs for a MySql/PostgreSQL/Oracle/Sqlite database which does not follow conventions of 
 frameworks such as rails, django, laravel etc is a small adventure that one like to avoid ..
 
 Hence this.
 
-# Setup and Usage
+## Setup and Usage
 
 xmysql requires node >= 7.6.0
 
+```ts
+npm install -g xsql
 ```
-npm install -g xmysql
-```
-```
+
+```ts
 xmysql -h localhost -u mysqlUsername -p mysqlPassword -d databaseName
 ```
-```
+
+```ts
 http://localhost:3000
 ```
 <br>
 
 That is it! Simple and minimalistic! 
-
-Happy hackery!
- 
-<!-- Place this tag where you want the button to render. -->
-
 
 # Example : Generate REST APIs for [Magento](http://www.magereverse.com/index/magento-sql-structure/version/1-7-0-2)
 
