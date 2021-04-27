@@ -30,7 +30,6 @@ console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
 
 /**
  * 获取本地服务内网IP地址，注册服务时需使用
- * @returns 
  */
 function getIpAddress() {
     try {
@@ -53,17 +52,19 @@ function getIpAddress() {
  * 初始化sqliteDB
  */
 const initSqliteDB = async() => {
+
     const cacheddl = config().memorycache.cacheddl;
-    console.log(`cache ddl #init# :`, cacheddl);
+    console.log(`cache ddl #init# >>>>>>>>>>>>>> :`, cacheddl);
     const keys = Object.keys(cacheddl);
 
-    for (tableName of keys) {
-        sqliteDB.query(cacheddl[tableName]);
-        memoryDB.query(cacheddl[tableName]);
-    }
+    (async() => {
+        for (tableName of keys) {
+            sqliteDB.query(cacheddl[tableName]);
+            memoryDB.query(cacheddl[tableName]);
+        }
+    })();
 
     (async() => { //拉取数据库数据
-
         for (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
 
             /***************** 方案一 增量 *****************/
@@ -80,7 +81,6 @@ const initSqliteDB = async() => {
 
             //查询主数据库所有数据，全部插入本地数据库中
         }
-
     })();
 }
 
