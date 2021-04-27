@@ -52,7 +52,7 @@ function getIpAddress() {
 /**
  * 初始化sqliteDB
  */
-function initSqliteDB() {
+const initSqliteDB = async() => {
     const cacheddl = config().memorycache.cacheddl;
     console.log(`cache ddl #init# :`, cacheddl);
     const keys = Object.keys(cacheddl);
@@ -167,11 +167,10 @@ const startXmysql = async(sqlConfig) => {
     /**************** END : setup express ****************/
 
     /**************** START : setup mysql ****************/
-    let mysqlPool = mysql.createPool(sqlConfig);
+    const mysqlPool = mysql.createPool(sqlConfig);
     /**************** END : setup mysql ****************/
 
     /**************** START : setup Xapi ****************/
-    let t = process.hrtime();
     let moreApis = new Xapi(sqlConfig, mysqlPool, app, sqliteDB, memoryDB);
 
     moreApis.init((err, results) => {
