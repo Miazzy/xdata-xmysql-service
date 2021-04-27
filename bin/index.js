@@ -220,8 +220,7 @@ const startXmysql = async(sqlConfig) => {
 function start(sqlConfig) {
     try {
 
-        //handle cmd line arguments
-        cmdargs.handle(sqlConfig);
+        cmdargs.handle(sqlConfig); //handle cmd line arguments
 
         if (cluster.isMaster && sqlConfig.useCpuCores > 1) {
 
@@ -233,8 +232,7 @@ function start(sqlConfig) {
             }
 
             cluster.on("exit", function(worker, code, signal) {
-                console.log(`Worker ${worker.process.pid} died with code: ${code} , and signal: ${signal} `);
-                console.log("Starting a new worker");
+                console.log("Starting a new worker", `Cause, Worker ${worker.process.pid} died with code: ${code} , and signal: ${signal} `);
                 cluster.fork();
             });
 
