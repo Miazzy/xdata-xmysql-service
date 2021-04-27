@@ -64,7 +64,10 @@ const initSqliteDB = async() => {
 
     (async() => { //拉取数据库数据
 
-        for (tableName of keys) {
+        for (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
+
+            /***************** 方案一 增量 *****************/
+
             //查询本地sqlite数据，获取当前最大值 id , xid
 
             //查询主数据库数据库大于当前最大值的数据 id 新增 //将多的数据同步新增过来
@@ -72,6 +75,10 @@ const initSqliteDB = async() => {
             //查询主数据库数据等于当前最大值得数据 xid 更新 //将多的数据同步更新过来
 
             //对小于等于当前最大值的数据，进行检查并更新操作，异步
+
+            /***************** 方案二 全量 *****************/
+
+            //查询主数据库所有数据，全部插入本地数据库中
         }
 
     })();
@@ -143,27 +150,6 @@ const startXmysql = async(sqlConfig) => {
             loggerFunction: console.error
         }));
     }
-
-    /** pretect限流功能 ， client是redis client
-     const redis = require('redis')
-     const client = redis.createClient();
-     app.use(protect.express.rateLimiter({
-         db: client,
-         id: (request) => request.connection.remoteAddress
-     }));
-     app.get('/', (request, response) => {
-         response.send('hello protect!')
-     });
-     app.post('/login', protect.express.rateLimiter({
-         db: client,
-         id: (request) => request.body.email,
-         // max 10 tries per 2 minutes
-         max: 10,
-         duration: 120000
-     }), (request, response) => {
-         response.send('wuut logged in')
-     });
-     */
     /**************** END : setup express ****************/
 
     /**************** START : setup mysql ****************/
