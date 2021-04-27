@@ -103,8 +103,8 @@ const middlewareNacos = async(req, res, next) => {
         await client.ready();
         await client.registerInstance(serviceName, { ip: ipAddress, port: serviceConfig.portNumber || port, });
 
-        //通过Zookeeper注册xdata.xmysql.service的rpc微服务
-        rpcregistry = new ZookeeperRegistry({ logger, address: nacosConfig.sofaZookeeperAddress, }); // 1. 创建 zk 注册中心客户端
+        //通过Zookeeper注册xdata.xmysql.service的rpc微服务 sofaRegistryName为none，不使用zookeeper注册中心
+        rpcregistry = nacosConfig.sofaRegistryName == 'none' ? null : new ZookeeperRegistry({ logger, address: nacosConfig.sofaZookeeperAddress, }); // 1. 创建 zk 注册中心客户端
         const rpcserver = new RpcServer({ logger, registry: rpcregistry, port: nacosConfig.sofaRpcPort, }); // 2. 创建 RPC Server 实例
         const rpcclient = new RpcClient({ logger, });
 
