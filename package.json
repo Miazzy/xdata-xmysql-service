@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
         "start": "node ./bin/index.js -u zhaoziyun -p ziyequma -d xdata -h 172.18.254.95 -o 39090 -n 3000",
+        "dev": "node ./bin/index.js -u zhaoziyun -p ziyequma -d xdata -h 172.18.254.95 -o 39090 -n 3000",
         "test": "./node_modules/.bin/mocha tests/*.js --exit"
     },
     "keywords": [
