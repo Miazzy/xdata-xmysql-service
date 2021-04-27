@@ -198,7 +198,7 @@ const startXmysql = async(sqlConfig) => {
     });
 
     //启动 RPC Server 并发布服务
-    rpcserver.start().then(() => { server.publish() });
+    rpcserver.start().then(() => { rpcserver.publish() });
 
     const nacosClient = nacosMiddleware.client;
     const nacosConfig = nacosMiddleware.nacosConfig;
