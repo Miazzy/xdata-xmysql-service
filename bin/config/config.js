@@ -66,7 +66,7 @@ module.exports = () => {
         password: 'ziyequma', // password of database / empty by default "-p, --password <n>"
         database: 'xdata', // database schema name "-d, --database <n>"
         ipAddress: '0.0.0.0', // IP interface of your server / localhost by default "-r, --ipAddress <n>"
-        portNumber: '3100', // port number for app / 3000 by default "-n, --portNumber <n>"
+        portNumber: '3000', // port number for app / 3000 by default "-n, --portNumber <n>"
         ignoreTables: '', // comma separated table names to ignore "-i, --ignoreTables <n>"
         socketPath: '', // unix socket path / not used by default "-S, --socketPath <n>"
         storageFolder: '', // storage folder / current working dir by default / available only with local "-s, --storageFolder <n>"
