@@ -5,6 +5,7 @@ const dblite = require('dblite');
 const bodyParser = require("body-parser");
 const express = require("express");
 const { RpcServer } = require('sofa-rpc-node').server;
+const { RpcClient } = require('sofa-rpc-node').client;
 const { ZookeeperRegistry } = require('sofa-rpc-node').registry;
 const protect = require('@risingstack/protect');
 const sqlConfig = require("commander");
@@ -96,16 +97,10 @@ const middlewareNacos = async(req, res, next) => {
 
         //通过Zookeeper注册xdata.xmysql.service的rpc微服务
         const rpcregistry = new ZookeeperRegistry({ logger, address: nacosConfig.sofaZookeeperAddress, }); // 1. 创建 zk 注册中心客户端
-        const rpcserver = new RpcServer({ logger, registry, port: nacosConfig.sofaRpcPort, }); // 2. 创建 RPC Server 实例
+        const rpcserver = new RpcServer({ logger, registry: rpcregistry, port: nacosConfig.sofaRpcPort, }); // 2. 创建 RPC Server 实例
         const rpcclient = new RpcClient({ logger, });
 
-        //获取Nacos注册列表
-        client.subscribe(nacosConfig.serviceName, hosts => {
-            targets = hosts; // 选出健康的targets;
-            console.log(nacosConfig.serviceName, ` targets: `, targets);
-        });
-
-        return { client, rpcserver, rpcclient, config: nacosConfig, zookeeperRegistry: rpcregistry, serviceConfig, nacosConfig, ipAddress, serviceName, sofaInterfaceName: nacosConfig.sofaInterfaceName };
+        return { client, rpcserver, rpcclient, config: nacosConfig, nacosConfig, zookeeperRegistry: rpcregistry, serviceConfig, nacosConfig, ipAddress, serviceName, sofaInterfaceName: nacosConfig.sofaInterfaceName };
     } catch (error) {
         console.log(error);
     }
@@ -115,12 +110,12 @@ const middlewareNacos = async(req, res, next) => {
  * Express服务启动函数
  * @param {*} sqlConfig 
  */
-function startXmysql(sqlConfig) {
+const startXmysql = async(sqlConfig) => {
 
     const protectConfig = config().protect;
 
     //注册Nacos并发布服务，服务名称：xdata-xmysql-service
-    const nacosMiddleware = middlewareNacos();
+    const nacosMiddleware = await middlewareNacos();
 
     /**************** START : setup express ****************/
     let app = express();
@@ -191,6 +186,8 @@ function startXmysql(sqlConfig) {
     //获取 RPC Server
     const rpcserver = nacosMiddleware.rpcserver;
 
+    console.log(`RPC SERVER:`, rpcserver);
+
     //RPC Server 添加服务
     rpcserver.addService({ interfaceName: nacosMiddleware.sofaInterfaceName }, {
         async parallelExec(tableName = '', query = '', params = [], type = 'nacos', callback = () => {}) {
@@ -204,6 +201,31 @@ function startXmysql(sqlConfig) {
     //启动 RPC Server 并发布服务
     rpcserver.start().then(() => { server.publish() });
 
+    const nacosClient = nacosMiddleware.client;
+    const nacosConfig = nacosMiddleware.nacosConfig;
+    const rpcClient = nacosMiddleware.rpcclient;
+    const rpcConsumeMap = new Map();
+
+    //获取Nacos注册列表
+    nacosClient.subscribe(nacosConfig.serviceName, hosts => {
+
+        console.log(nacosConfig.serviceName, ` targets: `, hosts);
+
+        for (const target of hosts) { // 选出健康的targets;
+            if (!(target.valid && target.healthy && target.enabled)) {
+                continue;
+            }
+            const consumer = rpcClient.createConsumer({ interfaceName: nacosConfig.sofaInterfaceName, serverHost: target.ip + ':' + nacosConfig.sofaRpcPort, });
+            consumer.ready();
+            rpcConsumeMap.set(target.ip, consumer);
+        }
+
+        rpcConsumeMap.set(nacosConfig.serviceName, hosts);
+    });
+
+    rpcConsumeMap.set('nacos.config', nacosConfig);
+    rpcConsumeMap.set('local.ipaddress', getIpAddress());
+    moreApis.mysql.setRpcConsumeMap(rpcConsumeMap);
 }
 
 /**
