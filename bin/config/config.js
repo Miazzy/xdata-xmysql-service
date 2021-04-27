@@ -24,8 +24,8 @@ module.exports = () => {
         readOnlyServiceName: 'xdata-rmysql-service', //只读模式
         sofaRpcPort: 3020, //sofa-rpc-node 微服务暴露端口
         sofaInterfaceName: 'xdata.xmysql.service', //sofa-rpc-node 微服务接口名称
-        sofaZookeeperAddress: '127.0.0.1:2181', //sofa-rpc-node 微服务注册地址
-        sofaRegistryName: 'none', //none表示不启用Zookeeper的注册中心 
+        sofaZookeeperAddress: '172.18.254.95:32181', //sofa-rpc-node 微服务注册地址
+        sofaRegistryName: 'zookeeper', //none表示不启用Zookeeper的注册中心 
     };
 
     config.redis = {
