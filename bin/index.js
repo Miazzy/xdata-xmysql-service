@@ -20,6 +20,7 @@ const requestIp = require('request-ip');
 const nacos = require('nacos');
 const os = require('os');
 const config = require('./config/config');
+const tools = require('../lib/tools/tools').tools;
 const sqlitePath = `${process.cwd()}/` + config().service.dblitepath;
 const sqliteDB = dblite(sqlitePath);
 const memoryDB = dblite(':memory:');
@@ -31,7 +32,7 @@ console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
 /**
  * 获取本地服务内网IP地址，注册服务时需使用
  */
-function getIpAddress() {
+const getIpAddress = () => {
     try {
         var ifaces = os.networkInterfaces()
         for (var dev in ifaces) {
@@ -63,6 +64,17 @@ const initSqliteDB = async() => {
             memoryDB.query(cacheddl[tableName]);
         }
     })();
+}
+
+/**
+ * 同步SqliteDB数据库
+ * @param {*} pool
+ */
+const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
+
+    const cacheddl = config().memorycache.cacheddl;
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    const keys = Object.keys(cacheddl);
 
     (async() => { //拉取数据库数据
         for (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
@@ -80,6 +92,12 @@ const initSqliteDB = async() => {
             /***************** 方案二 全量 *****************/
 
             //查询主数据库所有数据，全部插入本地数据库中
+            pool.query(`select * from ${tableName}`, [], (error, rows, _fields) => {
+                if (error) { //如果执行错误，则直接返回
+                    return console.log("mysql sync to sqlite >>>>> ", error);
+                }
+                tools.parseInsertStatement(tableName, rows, metaDB);
+            });
         }
     })();
 }
@@ -120,14 +138,14 @@ const middlewareNacos = async(req, res, next) => {
  */
 const startXmysql = async(sqlConfig) => {
 
+    //获取安全配置信息
     const protectConfig = config().protect;
 
     //注册Nacos并发布服务，服务名称：xdata-xmysql-service
     const nacosMiddleware = await middlewareNacos();
 
-    /**************** START : setup express ****************/
-    let app = express();
-
+    //设置express 
+    const app = express();
     app.use(morgan("tiny"));
     app.use(cors());
     app.use(bodyParser.json());
@@ -151,20 +169,17 @@ const startXmysql = async(sqlConfig) => {
             loggerFunction: console.error
         }));
     }
-    /**************** END : setup express ****************/
 
-    /**************** START : setup mysql ****************/
+    //设置mysql连接池 
     const mysqlPool = mysql.createPool(sqlConfig);
-    /**************** END : setup mysql ****************/
 
-    /**************** START : setup Xapi ****************/
-    let moreApis = new Xapi(sqlConfig, mysqlPool, app, sqliteDB, memoryDB);
+    //设置服务器RestAPI Xapi 
+    const moreApis = new Xapi(sqlConfig, mysqlPool, app, sqliteDB, memoryDB);
 
     moreApis.init((err, results) => {
         app.listen(sqlConfig.portNumber, sqlConfig.ipAddress);
-        console.log("          API's base URL    :   localhost:" + sqlConfig.portNumber);
+        console.log("API's base URL: ", nacosMiddleware.ipAddress + ":" + sqlConfig.portNumber);
     });
-    /**************** END : setup Xapi ****************/
 
     //启动本地sqlite，创建表，执行同步语句
     initSqliteDB(); //启动Sqlite本地缓存
@@ -172,15 +187,17 @@ const startXmysql = async(sqlConfig) => {
     //获取 RPC Server
     const rpcserver = nacosMiddleware.rpcserver;
 
-    console.log(`RPC SERVER:`, rpcserver);
-
     //RPC Server 添加服务
     rpcserver.addService({ interfaceName: nacosMiddleware.sofaInterfaceName }, {
-        async parallelExec(tableName = '', query = '', params = [], type = 'nacos', callback = () => {}) {
-            moreApis.mysql.parallelExec(tableName, query, params, type, callback);
+        async parallelExec(tableName = '', query = '', params = [], type = 'local', callback = () => {}) {
+            if (type != 'nacos') {
+                moreApis.mysql.parallelExec(tableName, query, params, type, callback);
+            }
         },
-        async nacosShareExec(tableName = '', query = '', params = [], type = 'nacos', callback = () => {}) {
-            moreApis.mysql.nacosShareExec(tableName, query, params, type, callback);
+        async nacosShareExec(tableName = '', query = '', params = [], type = 'local', callback = () => {}) {
+            if (type != 'nacos') {
+                moreApis.mysql.nacosShareExec(tableName, query, params, type, callback);
+            }
         },
     });
 
@@ -212,19 +229,19 @@ const startXmysql = async(sqlConfig) => {
     rpcConsumeMap.set('nacos.config', nacosConfig);
     rpcConsumeMap.set('local.ipaddress', getIpAddress());
     moreApis.mysql.setRpcConsumeMap(rpcConsumeMap);
+
+    //同步主数据库数据到sqlite
+    syncSqliteDB(moreApis.mysql);
 }
 
 /**
  * 获取命令行参数，并根据参数启动服务(Cluster模式)函数
  * @param {*} sqlConfig 
  */
-function start(sqlConfig) {
+const start = async(sqlConfig) => {
     try {
-
         cmdargs.handle(sqlConfig); //handle cmd line arguments
-
         if (cluster.isMaster && sqlConfig.useCpuCores > 1) {
-
             console.log(`Master ${process.pid} is running`);
 
             for (let i = 0; i < numCPUs && i < sqlConfig.useCpuCores; i++) {
@@ -236,11 +253,9 @@ function start(sqlConfig) {
                 console.log("Starting a new worker", `Cause, Worker ${worker.process.pid} died with code: ${code} , and signal: ${signal} `);
                 cluster.fork();
             });
-
         } else {
             startXmysql(sqlConfig);
         }
-
     } catch (error) {
         console.log(error);
     }

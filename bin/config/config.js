@@ -157,6 +157,34 @@ module.exports = () => {
                 xid                 varchar(36)  default '0'                null,
                 update_time         timestamp    default CURRENT_TIMESTAMP  null
             )`,
+            'bs_goods_receive': `CREATE TABLE IF NOT EXISTS bs_goods_receive
+            (
+                id               varchar(36)                 not null primary key, --  comment '主键'
+                create_by        varchar(50)                 null, --  comment '创建人',
+                create_time      datetime                    null, --  comment '创建日期',
+                receive_time     datetime                    null, --  comment '领用时间',
+                name             varchar(256)                null, --  comment '物品名称',
+                amount           varchar(32)                 null, --  comment '领用数量',
+                unit             varchar(32)  default '个'    null, --  comment '物品单位',
+                receive_name     varchar(256)                null, --  comment '领用人员',
+                remark           varchar(256)                null, --  comment '备注说明',
+                type             varchar(256) default '办公用品' null, --  comment '领用类别',
+                company          varchar(256)                null, --  comment '领用单位',
+                status           varchar(256) default '待处理'  null, --  comment '状态',
+                approve_name     varchar(256)                null, --  comment '审批人员',
+                workflow         varchar(256)                null, --  comment '关联流程',
+                department       varchar(256)                null, --  comment '领用部门',
+                approve          varchar(256)                null, --  comment '审批人员',
+                pid              varchar(36)                 null, --  comment '上级编号',
+                userid           varchar(256)                null, --  comment '接待人员',
+                user_group_ids   text                        null, --  comment '接待人员组',
+                user_group_names text                        null, --  comment '接待人员组名',
+                user_admin_name  varchar(256)                null, --  comment '接待姓名',
+                disagree_remark  varchar(256)                null, --  comment '驳回理由',
+                notify_time      datetime                    null, --  comment '消息通知时间',
+                serialid         int                         null,
+                xid              varchar(36)  default '0'    null
+            )`,
         },
     };
 
