@@ -74,7 +74,20 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
 
     const cacheddl = config().memorycache.cacheddl;
     console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
+    console.log(`cache ddl #sync# >>>>>>>>>>>>>> :`, cacheddl);
     const keys = Object.keys(cacheddl);
+
+    console.log(`cache ddl #sync# keys >>>>>>>>>>>>>> :`, keys);
 
     (async() => { //拉取数据库数据
         for (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
@@ -91,11 +104,16 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
 
             /***************** 方案二 全量 *****************/
 
+            console.log(`exec #sync# tablename#${tableName}# >>>>>>>>>>>>>> :`, keys);
+
             //查询主数据库所有数据，全部插入本地数据库中
             pool.query(`select * from ${tableName}`, [], (error, rows, _fields) => {
+
                 if (error) { //如果执行错误，则直接返回
                     return console.log("mysql sync to sqlite >>>>> ", error);
                 }
+
+                console.log(`mysql> tablename:`, tableName, ' rows length:', rows.length);
 
                 const statement = tools.parseInsertStatement(tableName, rows, metaDB);
                 execstr = sqlstring.format(statement.query, statement.params);
@@ -104,6 +122,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                 memoryDB.query(execstr);
 
                 return true;
+
             });
         }
     })();
