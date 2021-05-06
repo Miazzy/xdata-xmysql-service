@@ -185,6 +185,33 @@ module.exports = () => {
                 serialid         int                         null,
                 xid              varchar(36)  default '0'    null
             )`,
+            'bs_goods_borrow': `CREATE TABLE IF NOT EXISTS bs_goods_borrow
+            (
+                id               varchar(36)             not null primary key,--comment '主键'
+                create_by        varchar(50)             null, --  comment '创建人',
+                create_time      datetime                null, --  comment '创建日期',
+                amount           varchar(32)             null, --  comment '借用数量',
+                workflow         varchar(256)            null, --  comment '关联流程',
+                receive_time     datetime                null, --  comment '借用时间',
+                remark           varchar(256)            null, --  comment '备注说明',
+                type             varchar(256)            null, --  comment '借用类别',
+                serialid         int                     null, --  comment '序列编号',
+                approve          varchar(256)            null, --  comment '审批人员',
+                name             varchar(256)            null, --  comment '物品名称',
+                receive_name     varchar(256)            null, --  comment '借用人员',
+                company          varchar(256)            null, --  comment '借用单位',
+                department       varchar(256)            null, --  comment '借用部门',
+                status           varchar(256)            null, --  comment '状态',
+                approve_name     varchar(256)            null, --  comment '审批人员',
+                pid              varchar(36)             null, --  comment '上级编号',
+                user_group_ids   text                    null, --  comment '接待人员组',
+                userid           varchar(256)            null, --  comment '接待人员',
+                user_group_names text                    null, --  comment '接待人员组名',
+                user_admin_name  varchar(256)            null, --  comment '接待姓名',
+                unit             varchar(32)             null, --  comment '物品单位',
+                notify_time      datetime                null, --  comment '消息通知时间',
+                xid              varchar(36) default '0' null
+            )`,
         },
     };
 
