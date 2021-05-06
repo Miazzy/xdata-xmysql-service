@@ -96,7 +96,8 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                 if (error) { //如果执行错误，则直接返回
                     return console.log("mysql sync to sqlite >>>>> ", error);
                 }
-                tools.parseInsertStatement(tableName, rows, metaDB);
+                const statement = tools.parseInsertStatement(tableName, rows, metaDB);
+                console.log(`statement: `, statement);
             });
         }
     })();
