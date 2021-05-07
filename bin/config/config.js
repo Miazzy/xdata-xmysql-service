@@ -89,7 +89,7 @@ module.exports = () => {
     };
 
     config.memorycache = {
-        version: 'v2.2.1',
+        version: 'v2.2.2',
         cacheddl: {
             'bs_seal_regist': ``,
             'bs_goods_receive': ``,
