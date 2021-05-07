@@ -41,9 +41,9 @@ const openSQLiteDB = async() => {
         filename: sqliteFile,
         driver: sqlite3.cached.Database
     });
-    db.on('trace', (data) => {
-        console.info(`sqlite3 trace :`, data);
-    });
+    // db.on('trace', (data) => {
+    //     console.info(`sqlite3 trace :`, data);
+    // });
     return db;
 }
 
