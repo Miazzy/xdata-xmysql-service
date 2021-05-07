@@ -191,13 +191,13 @@ const generateDDL = async(database = 'xdata', tableName = '', pool = { query: ()
     })
 
     console.log(`generate create table ddl rows:`, rows);
-
     //根据表字段数据生成建表语句
     for (const element of rows) {
-        ddlSQL += ` ${element['column_name']}  ${element['column_type']}  ${element['column_default'] == 'CURRENT_TIMESTAMP' ? ' default CURRENT_TIMESTAMP ': (element['column_type'].includes('char') && !tools.isNull(element['column_default']) ? ` default '${element['column_default']}' ` : (!tools.isNull(element['column_default']) ?  ` default ${element['column_default']} ` : '') ) }   ${element['is_nullable'] == 'YES' ? ' null ' : ' not null ' }  ${element['column_key'] == 'PRI' ? ' primary key ' : ''} , `;
+        ddlSQL += ` ${element['column_name']}  ${element['column_type']}  ${element['column_default'] == 'CURRENT_TIMESTAMP' ? ' default CURRENT_TIMESTAMP ': (element['column_type'].includes('char') && !tools.isNull(element['column_default']) ? ` default '${element['column_default']}' ` : (!tools.isNull(element['column_default']) ?  ` default ${element['column_default']} ` : '') ) }   ${element['is_nullable'] == 'YES' ? ' null ' : ' not null ' }  ${element['column_key'] == 'PRI' ? ' primary key ' : ''} ,`;
     }
-
+    ddlSQL = ddlSQL.replace(/,$/gi,"");
     ddlSQL += ' ) '; // 建表语句封尾
+
     console.log(`generate create table ddl:`, ddlSQL);
     console.error(`generate create table ddl:`, ddlSQL);
     cache.setValue(cacheKey.replace('_flag', '_create_sql'), ddlSQL, 3600 * 24 * 365 * 1000);
