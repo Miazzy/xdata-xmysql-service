@@ -41,8 +41,8 @@ const openSQLiteDB = async() => {
         filename: sqliteFile,
         driver: sqlite3.cached.Database
     });
-    db.on('trace', (data) => {
-        console.error(`sqlite3 trace error:`, data);
+    db.on('trace', (data, err, e) => {
+        console.error(`sqlite3 trace error:`, data, err, e);
     });
     sqliteDB.on('error', function(err) {
         console.error(`sqlite trace error:`, err.toString());
