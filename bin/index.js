@@ -192,7 +192,7 @@ const generateDDL = async(database = 'xdata', tableName = '', pool = { query: ()
 
     //根据表字段数据生成建表语句
     for (const element of rows) {
-        ddlSQL += ` ${element['column_name']}  ${element['column_type']}  ${element['column_type'] == 'timestamp' && element['column_default'] == 'CURRENT_TIMESTAMP' ? ' default CURRENT_TIMESTAMP ':'' }   ${element['is_nullable'] == 'YES' ? ' null ' : ' not null ' }  ${element['column_key'] == 'PRI' ? ' primary key ' : ''} , `;
+        ddlSQL += ` ${element['column_name']}  ${element['column_type']}  ${element['column_default'] == 'CURRENT_TIMESTAMP' ? ' default CURRENT_TIMESTAMP ': (element['column_type'].includes('char') && !tools.isNull(element['column_default']) ? ` default '${element['column_default']}' ` : (!tools.isNull(element['column_default']) ?  ` default ${element['column_default']} ` : '') ) }   ${element['is_nullable'] == 'YES' ? ' null ' : ' not null ' }  ${element['column_key'] == 'PRI' ? ' primary key ' : ''} , `;
     }
 
     ddlSQL += ' ) '; // 建表语句封尾
