@@ -15,7 +15,7 @@ module.exports = () => {
     const config = exports = {};
 
     config.nacos = {
-        registStatus: false,
+        registStatus: true,
         logger: console,
         serverList: ['172.18.1.50:8848', '172.18.1.50:8849', '172.18.1.50:8850'], // replace to real nacos serverList
         namespace: 'public',
@@ -88,7 +88,7 @@ module.exports = () => {
     };
 
     config.memorycache = {
-        version: 'v2.0.2',
+        version: 'v2.0.3',
         cacheddl: {
             'bs_seal_regist': `CREATE TABLE IF NOT EXISTS bs_seal_regist
             (
