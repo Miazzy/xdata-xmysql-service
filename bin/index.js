@@ -74,16 +74,17 @@ const initSqliteDB = async() => {
     const keys = Object.keys(cacheddl);
     console.log(`cache ddl #init# >>>>>>>>>>>>>> `);
 
-
-
     (async() => {
         for await (tableName of keys) {
             const cacheKey = `init_sqlite_${tableName}_${version}`;
             const flag = await cache.getValue(cacheKey);
             const initSQL = cacheddl[tableName];
             if (flag != `true`) {
+
                 sqliteDB.query(initSQL);
                 memoryDB.query(initSQL);
+                await sqlite3DB.exec(initSQL);
+
                 cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
                 console.log(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
             } else {
@@ -167,11 +168,13 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                                     sqliteDB.query('COMMIT');
                                     memoryDB.query('COMMIT');
 
-                                    //console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page);
-                                    //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
+                                    await sqlite3DB.exec(execstr);
+
+                                    console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page);
+                                    console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
 
                                     ++page;
-                                    await tools.sleep(15);
+                                    await tools.sleep(2.5);
                                 } catch (error) {
                                     console.log(`sqlite db exec error:`, error);
                                     continue;
@@ -236,7 +239,7 @@ const startXmysql = async(sqlConfig) => {
     //获取 RPC Server
     const rpcserver = nacosMiddleware.rpcserver;
     //获取sqlite3DB实例
-    const sqlite3DB = await openSQLiteDB();
+    sqlite3DB = await openSQLiteDB();
 
     //设置express 
     const app = express();
