@@ -83,11 +83,9 @@ const initSqliteDB = async() => {
             const flag = await cache.getValue(cacheKey);
             const initSQL = cacheddl[tableName];
             if (flag != `true`) {
-
-                sqliteDB.query(initSQL);
-                memoryDB.query(initSQL);
+                // sqliteDB.query(initSQL);
+                // memoryDB.query(initSQL);
                 await sqlite3DB.exec(initSQL);
-
                 cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
                 console.log(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
             } else {
