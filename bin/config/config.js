@@ -15,6 +15,7 @@ module.exports = () => {
     const config = exports = {};
 
     config.nacos = {
+        registStatus: false,
         logger: console,
         serverList: ['172.18.1.50:8848', '172.18.1.50:8849', '172.18.1.50:8850'], // replace to real nacos serverList
         namespace: 'public',
@@ -29,7 +30,7 @@ module.exports = () => {
     };
 
     config.redis = {
-        host: '172.18.254.95',
+        host: '172.18.254.95', // 127.0.0.1:6379 172.18.254.95:36379
         port: 36379,
         family: 4, // 4 (IPv4) or 6 (IPv6)
         password: "",
@@ -38,7 +39,7 @@ module.exports = () => {
 
     config.redisclustr = {
         servers: [{
-            host: '172.18.254.95',
+            host: '172.18.254.95', //127.0.0.1:6379 172.18.254.95:37000
             port: 37000,
         }],
         slotInterval: 1000, // default: none. Interval to repeatedly re-fetch cluster slot configuration
@@ -60,7 +61,7 @@ module.exports = () => {
     };
 
     config.service = {
-        host: '172.18.254.95', // hostname of database / localhost by default "-h, --host <n>"
+        host: '172.18.254.95', // 172.18.254.95 222.212.88.72 hostname of database / localhost by default "-h, --host <n>"
         port: '39090', // port number for mysql / 3306 by default "-o, --port <n>"
         user: 'zhaoziyun', // username of database / root by default "-u, --user <n>"
         password: 'ziyequma', // password of database / empty by default "-p, --password <n>"
@@ -87,6 +88,7 @@ module.exports = () => {
     };
 
     config.memorycache = {
+        version: 'v1.3.7',
         cacheddl: {
             'bs_seal_regist': `CREATE TABLE IF NOT EXISTS bs_seal_regist
             (
@@ -187,7 +189,7 @@ module.exports = () => {
             )`,
             'bs_goods_borrow': `CREATE TABLE IF NOT EXISTS bs_goods_borrow
             (
-                id               varchar(36)             not null primary key,--comment '主键'
+                id               varchar(36)             not null primary key, -- comment '主键'
                 create_by        varchar(50)             null, --  comment '创建人',
                 create_time      datetime                null, --  comment '创建日期',
                 amount           varchar(32)             null, --  comment '借用数量',
