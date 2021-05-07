@@ -48,26 +48,6 @@ const openSQLiteDB = async() => {
 }
 
 /**
- * 获取本地服务内网IP地址，注册服务时需使用
- */
-const getIpAddress = () => {
-    try {
-        var ifaces = os.networkInterfaces()
-        for (var dev in ifaces) {
-            let iface = ifaces[dev]
-            for (let i = 0; i < iface.length; i++) {
-                let { family, address, internal } = iface[i]
-                if (family === 'IPv4' && address !== '127.0.0.1' && !internal) {
-                    return address
-                }
-            }
-        }
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-/**
  * 初始化sqliteDB
  */
 const initSqliteDB = async() => {
@@ -174,12 +154,11 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                                     // memoryDB.query('COMMIT');
 
                                     sqlite3DB.exec(execstr);
+                                    ++page;
+                                    //await tools.sleep(5);
 
                                     //console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page);
                                     //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
-
-                                    ++page;
-                                    //await tools.sleep(5);
                                 } catch (error) {
                                     console.log(`sqlite db exec error:`, error);
                                     continue;
@@ -209,7 +188,7 @@ const middlewareNacos = async(req, res, next) => {
     try {
         const nacosConfig = config().nacos;
         const serviceConfig = config().service;
-        const ipAddress = getIpAddress();
+        const ipAddress = tools.getIpAddress();
         const client = new nacos.NacosNamingClient(nacosConfig);
         const serviceName = serviceConfig.debug ? nacosConfig.debugServiceName : (serviceConfig.readOnly ? nacosConfig.readOnlyServiceName : nacosConfig.serviceName);
         if (!nacosConfig.registStatus) {
@@ -333,7 +312,7 @@ const startXmysql = async(sqlConfig) => {
         });
 
         rpcConsumeMap.set('nacos.config', nacosConfig);
-        rpcConsumeMap.set('local.ipaddress', getIpAddress());
+        rpcConsumeMap.set('local.ipaddress', tools.getIpAddress());
         moreApis.mysql.setRpcConsumeMap(rpcConsumeMap);
     }
 
