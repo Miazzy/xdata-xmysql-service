@@ -138,24 +138,29 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                                     sqliteDB.query('BEGIN TRANSACTION');
                                     memoryDB.query('BEGIN TRANSACTION');
                                     sqliteDB.query(execstr, [], (err, rows) => {
-                                        console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows);
+                                        if (err) {
+                                            console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows);
+                                        }
                                     });
                                     memoryDB.query(execstr, [], (err, rows) => {
-                                        console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows);
+                                        if (err) {
+                                            console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows);
+                                        }
                                     });
                                     sqliteDB.query('COMMIT');
                                     memoryDB.query('COMMIT');
 
-                                    console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page);
-                                    console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
+                                    //console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page);
+                                    //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
 
                                     ++page;
-                                    await tools.sleep(10);
+                                    await tools.sleep(15);
                                 } catch (error) {
                                     console.log(`sqlite db exec error:`, error);
                                     continue;
                                 }
                             }
+                            console.log(`database> sync tablename:`, qTableName, ` over ... `);
                         })();
                     } catch (error) {
                         console.log(`sql error:`, error);
