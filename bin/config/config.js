@@ -89,7 +89,7 @@ module.exports = () => {
     };
 
     config.memorycache = {
-        version: 'v2.1.5',
+        version: 'v2.1.7',
         cacheddl: {
             'bs_seal_regist': `CREATE TABLE IF NOT EXISTS bs_seal_regist
             (
