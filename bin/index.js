@@ -62,7 +62,10 @@ const initSqliteDB = async() => {
         for await (tableName of keys) {
             const cacheKey = `init_sqlite_${tableName}_${ipaddress}_${version}`;
             const flag = await cache.getValue(cacheKey);
-            const initSQL = cacheddl[tableName];
+            let initSQL = cacheddl[tableName];
+            if (tools.isNull(initSQL) || initSQL == 'generate' || initSQL == 'auto') {
+                initSQL = await generateDDL(tableName);
+            }
             if (flag != `true`) { // await sqliteDB.query(initSQL); // memoryDB.query(initSQL);
                 await sqlite3DB.exec(initSQL);
                 cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
@@ -152,6 +155,46 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
             }
         }
     })();
+}
+
+/**
+ * 根据MySQL系统中表配置信息生成SQLite建表语句
+ */
+const generateDDL = async(database = 'xdata', tableName = '', pool = { query: () => {} }) => {
+
+    if (tools.isNull(tableName)) {
+        return '';
+    }
+
+    const cacheKey = `generate_sqlite_rows_flag`;
+    const flag = await cache.getValue(cacheKey);
+    const querySQL = "SELECT `c`.`table_name`, `c`.`column_name`, `c`.`ordinal_position`, `c`.`column_key`, `c`.`is_nullable`, `c`.`column_type`, `c`.`column_default` FROM ((`information_schema`.`columns` AS `c` LEFT JOIN `information_schema`.`key_column_usage` AS `k` ON `c`.`column_name` = `k`.`column_name` AND `c`.`table_schema` = `k`.`referenced_table_schema` AND `c`.`table_name` = `k`.`table_name`) LEFT JOIN `information_schema`.`statistics` AS `s` ON `c`.`column_name` = `s`.`column_name` AND `c`.`table_schema` = `s`.`index_schema` AND `c`.`table_name` = `s`.`table_name`) LEFT JOIN `information_schema`.`VIEWS` AS `v` ON `c`.`table_schema` = `v`.`table_schema` AND `c`.`table_name` = `v`.`table_name` WHERE `c`.`table_schema` = ':table_schema' AND `v`.`table_name` IS NULL ORDER BY `c`.`table_name`, `c`.`ordinal_position` ".replace(/:table_schema/g, database);
+
+    let ddlSQL = `CREATE TABLE IF NOT EXISTS ${tableName} ( `;
+
+    if (flag != 'true') { //查询表字段信息
+        pool.query(querySQL, [], (error, rows, _fields) => {
+            cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
+            cache.setValue(cacheKey.replace('_flag', '_value'), JSON.stringify(rows), 3600 * 24 * 365 * 1000);
+        });
+    }
+
+    let rows = await cache.getValue(cacheKey.replace('_flag', '_value'));
+    rows = JSON.parse(rows);
+
+    //筛选数据，选出表名称的数据
+    rows = rows.filter((item) => {
+        return item['table_name'] == tableName;
+    })
+
+    //根据表字段数据生成建表语句
+    for (const element of rows) {
+        ddlSQL += ` ${element['column_name']}  ${element['column_type']}  ${element['column_type'] == 'timestamp' && element['column_default'] == 'CURRENT_TIMESTAMP' ? ' default CURRENT_TIMESTAMP ':'' }   ${element['is_nullable'] == 'YES' ? ' null ' : ' not null ' }  ${element['column_key'] == 'PRI' ? ' primary key ' : ''} , `;
+    }
+
+    ddlSQL += ' ) '; // 建表语句封尾
+
+    return ddlSQL;
 }
 
 /**

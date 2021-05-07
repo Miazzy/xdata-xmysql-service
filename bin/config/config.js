@@ -91,8 +91,7 @@ module.exports = () => {
     config.memorycache = {
         version: 'v2.1.7',
         cacheddl: {
-            'bs_seal_regist': `CREATE TABLE IF NOT EXISTS bs_seal_regist
-            (
+            'bs_seal_regist': `CREATE TABLE IF NOT EXISTS bs_seal_regist (
                 id                  varchar(36)                            not null  primary key,
                 create_by           varchar(128)                           null ,
                 create_time         timestamp    default CURRENT_TIMESTAMP not null,
@@ -160,8 +159,7 @@ module.exports = () => {
                 xid                 varchar(36)  default '0'                null,
                 update_time         timestamp    default CURRENT_TIMESTAMP  null
             )`,
-            'bs_goods_receive': `CREATE TABLE IF NOT EXISTS bs_goods_receive
-            (
+            'bs_goods_receive': `CREATE TABLE IF NOT EXISTS bs_goods_receive (
                 id               varchar(36)                 not null primary key, --  comment '主键'
                 create_by        varchar(50)                 null, --  comment '创建人',
                 create_time      datetime                    null, --  comment '创建日期',
@@ -188,8 +186,7 @@ module.exports = () => {
                 serialid         int                         null,
                 xid              varchar(36)  default '0'    null
             )`,
-            'bs_goods_borrow': `CREATE TABLE IF NOT EXISTS bs_goods_borrow
-            (
+            'bs_goods_borrow': `CREATE TABLE IF NOT EXISTS bs_goods_borrow (
                 id               varchar(36)             not null primary key, -- comment '主键'
                 create_by        varchar(50)             null, --  comment '创建人',
                 create_time      datetime                null, --  comment '创建日期',
