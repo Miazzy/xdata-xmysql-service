@@ -155,7 +155,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                                     maxRow = pageSize * (page - 0);
                                     const curRows = rows.slice(startPage, maxRow);
                                     const statement = tools.parseInsertStatement(qTableName, curRows, metaDB);
-                                    execstr = sqlstring.format(statement.query, statement.params);
+                                    let execstr = sqlstring.format(statement.query, statement.params);
                                     execstr = execstr.replace(/\r|\n/g, '');
 
                                     //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行
