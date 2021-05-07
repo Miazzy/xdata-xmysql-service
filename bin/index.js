@@ -64,8 +64,7 @@ const initSqliteDB = async() => {
             const flag = await cache.getValue(cacheKey);
             const initSQL = cacheddl[tableName];
             if (flag != `true`) {
-                // sqliteDB.query(initSQL);
-                // memoryDB.query(initSQL);
+                await sqliteDB.query(initSQL); // memoryDB.query(initSQL);
                 await sqlite3DB.exec(initSQL);
                 cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
                 console.log(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
@@ -126,7 +125,9 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                             let page = 1,
                                 maxRow = 0,
                                 maxPage = Math.ceil(rows.length / pageSize);
+
                             sqlite3DB.exec('BEGIN TRANSACTION');
+                            sqliteDB.query('BEGIN TRANSACTION');
                             while (page <= maxPage) {
                                 try {
                                     startPage = pageSize * (page - 1);
@@ -135,36 +136,21 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                                     const statement = tools.parseInsertStatement(qTableName, curRows, metaDB);
                                     let execstr = sqlstring.format(statement.query, statement.params);
                                     execstr = execstr.replace(/\r|\n/g, '');
-
                                     //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行
-
-                                    // sqliteDB.query('BEGIN TRANSACTION');
-                                    // memoryDB.query('BEGIN TRANSACTION');
-                                    // sqliteDB.query(execstr, [], (err, rows) => {
-                                    //     if (err) {
-                                    //         console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows);
-                                    //     }
-                                    // });
-                                    // memoryDB.query(execstr, [], (err, rows) => {
-                                    //     if (err) {
-                                    //         console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows);
-                                    //     }
-                                    // });
-                                    // sqliteDB.query('COMMIT');
-                                    // memoryDB.query('COMMIT');
-
+                                    sqliteDB.query(execstr, [], (err, rows) => { err ? (console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows)) : null; });
                                     sqlite3DB.exec(execstr);
-                                    ++page;
-                                    //await tools.sleep(5);
-
                                     //console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page);
                                     //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
                                 } catch (error) {
                                     console.log(`sqlite db exec error:`, error);
                                     continue;
+                                } finally {
+                                    ++page;
                                 }
                             }
                             sqlite3DB.exec('COMMIT');
+                            sqliteDB.query('COMMIT');
+
                             console.log(`database> sync tablename:`, qTableName, ` over ... `);
                         })();
                     } catch (error) {
