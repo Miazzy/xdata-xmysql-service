@@ -149,6 +149,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                             let page = 1,
                                 maxRow = 0,
                                 maxPage = Math.ceil(rows.length / pageSize);
+                            sqlite3DB.exec('BEGIN TRANSACTION');
                             while (page <= maxPage) {
                                 try {
                                     startPage = pageSize * (page - 1);
@@ -160,33 +161,34 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
 
                                     //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行
 
-                                    sqliteDB.query('BEGIN TRANSACTION');
-                                    memoryDB.query('BEGIN TRANSACTION');
-                                    sqliteDB.query(execstr, [], (err, rows) => {
-                                        if (err) {
-                                            console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows);
-                                        }
-                                    });
-                                    memoryDB.query(execstr, [], (err, rows) => {
-                                        if (err) {
-                                            console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows);
-                                        }
-                                    });
-                                    sqliteDB.query('COMMIT');
-                                    memoryDB.query('COMMIT');
+                                    // sqliteDB.query('BEGIN TRANSACTION');
+                                    // memoryDB.query('BEGIN TRANSACTION');
+                                    // sqliteDB.query(execstr, [], (err, rows) => {
+                                    //     if (err) {
+                                    //         console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows);
+                                    //     }
+                                    // });
+                                    // memoryDB.query(execstr, [], (err, rows) => {
+                                    //     if (err) {
+                                    //         console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows);
+                                    //     }
+                                    // });
+                                    // sqliteDB.query('COMMIT');
+                                    // memoryDB.query('COMMIT');
 
-                                    await sqlite3DB.exec(execstr);
+                                    sqlite3DB.exec(execstr);
 
                                     //console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page);
                                     //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
 
                                     ++page;
-                                    await tools.sleep(5);
+                                    //await tools.sleep(5);
                                 } catch (error) {
                                     console.log(`sqlite db exec error:`, error);
                                     continue;
                                 }
                             }
+                            sqlite3DB.exec('COMMIT');
                             console.log(`database> sync tablename:`, qTableName, ` over ... `);
                         })();
                     } catch (error) {
