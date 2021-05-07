@@ -68,14 +68,18 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                 initSQL = await generateDDL(database, tableName, pool);
             }
             if (flag != `true`) { // await sqliteDB.query(initSQL); // memoryDB.query(initSQL);
-                await sqlite3DB.exec(initSQL);
+                sqlite3DB.exec('BEGIN TRANSACTION');
+                sqlite3DB.exec(initSQL);
+                sqlite3DB.exec('COMMIT');
                 cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
                 console.log(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
-            } else {
-                continue;
-            }
+                console.log(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
+                console.log(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
+            } 
         }
     })();
+
+    await tools.sleep(1500);
 }
 
 /**
