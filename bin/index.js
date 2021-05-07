@@ -68,6 +68,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                 initSQL = await generateDDL(database, tableName, pool);
             }
             if (flag != `true`) { // await sqliteDB.query(initSQL); // memoryDB.query(initSQL);
+                sqliteDB.query(initSQL); 
                 sqlite3DB.exec('BEGIN TRANSACTION');
                 sqlite3DB.exec(initSQL);
                 sqlite3DB.exec('COMMIT');
