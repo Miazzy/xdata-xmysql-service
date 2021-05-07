@@ -76,7 +76,7 @@ module.exports = () => {
         readOnly: false, // readonly apis / false by default "-y, --readOnly"
         useCpuCores: '0', // use number of CPU cores (using cluster) / 1 by default "-c, --useCpuCores <n>"
         commonCacheTime: 1,
-        dblitepath: './database/db.sqlite',
+        dblitepath: './database/db.sqlite.db',
         sqlitepath: './database/db.sqlite3.db',
     };
 
