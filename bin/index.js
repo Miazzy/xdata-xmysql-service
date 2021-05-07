@@ -50,11 +50,12 @@ const openSQLiteDB = async() => {
 /**
  * 初始化sqliteDB
  */
-const initSqliteDB = async() => {
+const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
 
     const ipaddress = tools.getIpAddress();
     const cacheddl = config().memorycache.cacheddl;
     const version = config().memorycache.version;
+    const database = config().service.database || 'xdata';
     const keys = Object.keys(cacheddl);
     console.log(`cache ddl #init# >>>>>>>>>>>>>> `);
 
@@ -64,7 +65,7 @@ const initSqliteDB = async() => {
             const flag = await cache.getValue(cacheKey);
             let initSQL = cacheddl[tableName];
             if (tools.isNull(initSQL) || initSQL == 'generate' || initSQL == 'auto') {
-                initSQL = await generateDDL(tableName);
+                initSQL = await generateDDL(database, tableName, pool);
             }
             if (flag != `true`) { // await sqliteDB.query(initSQL); // memoryDB.query(initSQL);
                 await sqlite3DB.exec(initSQL);
@@ -172,11 +173,13 @@ const generateDDL = async(database = 'xdata', tableName = '', pool = { query: ()
 
     let ddlSQL = `CREATE TABLE IF NOT EXISTS ${tableName} ( `;
 
+    pool.query(querySQL, [], (error, rows, _fields) => {
+        cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
+        cache.setValue(cacheKey.replace('_flag', '_value'), JSON.stringify(rows), 3600 * 24 * 365 * 1000);
+    });
+
     if (flag != 'true') { //查询表字段信息
-        pool.query(querySQL, [], (error, rows, _fields) => {
-            cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
-            cache.setValue(cacheKey.replace('_flag', '_value'), JSON.stringify(rows), 3600 * 24 * 365 * 1000);
-        });
+        await tools.sleep(15000);
     }
 
     let rows = await cache.getValue(cacheKey.replace('_flag', '_value'));
@@ -193,6 +196,8 @@ const generateDDL = async(database = 'xdata', tableName = '', pool = { query: ()
     }
 
     ddlSQL += ' ) '; // 建表语句封尾
+    console.log(`generate create table ddl:`, ddlSQL);
+    cache.setValue(cacheKey.replace('_flag', '_create_sql'), ddlSQL, 3600 * 24 * 365 * 1000);
 
     return ddlSQL;
 }
@@ -285,7 +290,7 @@ const startXmysql = async(sqlConfig) => {
         (async() => {
             await tools.sleep(1500); //等待Nms
             const metaDB = moreApis.getXSQL().getMetaDB();
-            await initSqliteDB(); //启动Sqlite本地缓存
+            await initSqliteDB(mysqlPool, metaDB); //启动Sqlite本地缓存
             await tools.sleep(1500); //等待Nms
             await syncSqliteDB(mysqlPool, metaDB); //同步主数据库数据到sqlite
         })();
