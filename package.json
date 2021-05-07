@@ -44,7 +44,9 @@
         "redis": "^2.8.0",
         "redis-clustr": "^1.7.0",
         "request-ip": "^2.1.3",
-        "sofa-rpc-node": "^2.0.0"
+        "sofa-rpc-node": "^2.0.0",
+        "sqlite": "^4.0.21",
+        "sqlite3": "^5.0.2"
     },
     "devDependencies": {
         "eslint-config-airbnb-base": "^13.1.0",
