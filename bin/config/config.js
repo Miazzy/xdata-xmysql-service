@@ -50,7 +50,7 @@ module.exports = () => {
         createClient: function(port, host, options = {}) {
             options.password = '1234567890';
             options.db = 0;
-            return require('redis').createClient(port, host, options:'',
+            return require('redis').createClient(port, host, options);
         },
         redisOptions: {}
     };
