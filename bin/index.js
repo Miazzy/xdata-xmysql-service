@@ -73,8 +73,8 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                 sqlite3DB.exec('COMMIT');
                 cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
                 console.log(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
-                console.log(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
-                console.log(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
+                console.info(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
+                console.error(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
             } 
         }
     })();
