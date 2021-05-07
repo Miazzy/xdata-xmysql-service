@@ -42,7 +42,10 @@ const openSQLiteDB = async() => {
         driver: sqlite3.cached.Database
     });
     db.on('trace', (data) => {
-        console.error(`sqlite trace error:`, data);
+        console.error(`sqlite3 trace error:`, data);
+    });
+    sqliteDB.on('error', function(err) {
+        console.error(`sqlite trace error:`, err.toString());
     });
     return db;
 }
@@ -142,7 +145,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                         }
                         (async() => {
                             console.log(`database> querySQL: ${querySQL} tablename:`, qTableName, ' rows length:', rows.length);
-                            const pageSize = 10; // 10条批量执行
+                            const pageSize = 1; // 10条批量执行
                             let page = 1,
                                 maxRow = 0,
                                 maxPage = Math.ceil(rows.length / pageSize);
@@ -153,6 +156,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                                     const curRows = rows.slice(startPage, maxRow);
                                     const statement = tools.parseInsertStatement(qTableName, curRows, metaDB);
                                     execstr = sqlstring.format(statement.query, statement.params);
+                                    execstr = execstr.replace(/\r|\n/g, '');
 
                                     //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行
 
@@ -173,8 +177,8 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
 
                                     await sqlite3DB.exec(execstr);
 
-                                    console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page);
-                                    console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
+                                    //console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page);
+                                    //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
 
                                     ++page;
                                     await tools.sleep(5);
