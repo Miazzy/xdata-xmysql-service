@@ -89,7 +89,7 @@ module.exports = () => {
     };
 
     config.memorycache = {
-        version: 'v2.3.0',
+        version: 'v2.3.2',
         cacheddl: {
             'bs_ability_quota':'',
             'bs_admin_address':'',
