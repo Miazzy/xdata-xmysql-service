@@ -30,8 +30,8 @@ const sqliteDB = dblite(sqlitePath);
 const memoryDB = dblite(':memory:');
 const port = config().service.portNumber || 3000;
 const logger = console;
+sqlite3.verbose();
 console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
-
 
 /**
  * 打开SQLiteDB
@@ -40,6 +40,9 @@ const openSQLiteDB = async() => {
     const db = await open({
         filename: sqliteFile,
         driver: sqlite3.cached.Database
+    });
+    db.on('trace', (data) => {
+        console.error(`sqlite trace error:`, data);
     });
     return db;
 }
