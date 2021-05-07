@@ -250,10 +250,11 @@ const startXmysql = async(sqlConfig) => {
         // 启动express监听
         app.listen(sqlConfig.portNumber, sqlConfig.ipAddress);
         // 启动本地sqlite，创建表，执行同步语句
-        const metaDB = moreApis.getXSQL().getMetaDB();
         (async() => {
+            await tools.sleep(1500); //等待Nms
+            const metaDB = moreApis.getXSQL().getMetaDB();
             await initSqliteDB(); //启动Sqlite本地缓存
-            await tools.sleep(1500); //等待1000ms
+            await tools.sleep(1500); //等待Nms
             await syncSqliteDB(mysqlPool, metaDB); //同步主数据库数据到sqlite
         })();
         // 打印启动完毕日志
