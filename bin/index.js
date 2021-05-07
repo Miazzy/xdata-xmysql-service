@@ -177,7 +177,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                                     console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
 
                                     ++page;
-                                    await tools.sleep(2.5);
+                                    await tools.sleep(5);
                                 } catch (error) {
                                     console.log(`sqlite db exec error:`, error);
                                     continue;
