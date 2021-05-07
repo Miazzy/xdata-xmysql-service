@@ -192,8 +192,11 @@ const generateDDL = async(database = 'xdata', tableName = '', pool = { query: ()
     //筛选数据，选出表名称的数据
     rows = rows.filter((item) => {
         return item['table_name'] == tableName;
-    })
-
+    });
+    rows = rows.filter((item , index) => {
+        const _index = rows.findIndex(elem=>{return elem['column_name'] == item['column_name']})
+        return _index == index;
+    });
     console.log(`generate create table ddl rows:`, rows);
     //根据表字段数据生成建表语句
     for (const element of rows) {
