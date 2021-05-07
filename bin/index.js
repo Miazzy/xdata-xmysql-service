@@ -159,6 +159,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                     return true;
                 });
             }
+            await tools.sleep(3000);
         }
     })();
 }
