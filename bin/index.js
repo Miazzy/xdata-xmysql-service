@@ -72,6 +72,7 @@ const getIpAddress = () => {
  */
 const initSqliteDB = async() => {
 
+    const ipaddress = tools.getIpAddress();
     const cacheddl = config().memorycache.cacheddl;
     const version = config().memorycache.version;
     const keys = Object.keys(cacheddl);
@@ -79,7 +80,7 @@ const initSqliteDB = async() => {
 
     (async() => {
         for await (tableName of keys) {
-            const cacheKey = `init_sqlite_${tableName}_${version}`;
+            const cacheKey = `init_sqlite_${tableName}_${ipaddress}_${version}`;
             const flag = await cache.getValue(cacheKey);
             const initSQL = cacheddl[tableName];
             if (flag != `true`) {
@@ -107,6 +108,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     }
     console.log(`metaDB: `, ` metaDB.tables:`, JSON.stringify(metaDB.tables).slice(0, 100), ` metaDB.tables length: `, Object.keys(metaDB.tables).length);
 
+    const ipaddress = tools.getIpAddress();
     const cacheddl = config().memorycache.cacheddl;
     const version = config().memorycache.version;
     const keys = Object.keys(cacheddl);
@@ -116,7 +118,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     (async() => { //拉取数据库数据
         for await (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
 
-            const cacheKey = `sync_sqlite_${tableName}_${version}`;
+            const cacheKey = `sync_sqlite_${tableName}_${ipaddress}_${version}`;
             const flag = await cache.getValue(cacheKey);
             console.log(`cache key: ${cacheKey} flag: ${flag} . `);
             if (flag == `true`) { /***************** 方案一 增量 *****************/
