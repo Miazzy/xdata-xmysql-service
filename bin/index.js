@@ -2,6 +2,8 @@
 
 const morgan = require("morgan");
 const dblite = require('dblite');
+const sqlite3 = require('sqlite3');
+const { open } = require('sqlite');
 const bodyParser = require("body-parser");
 const express = require("express");
 const sqlstring = require('sqlstring');
@@ -23,11 +25,27 @@ const config = require('./config/config');
 const tools = require('../lib/tools/tools').tools;
 const cache = require('../lib/cache/cache');
 const sqlitePath = `${process.cwd()}/` + config().service.dblitepath;
+const sqliteFile = `${process.cwd()}/` + config().service.sqlitepath;
 const sqliteDB = dblite(sqlitePath);
 const memoryDB = dblite(':memory:');
 const port = config().service.portNumber || 3000;
 const logger = console;
+
+
+
 console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
+
+
+/**
+ * 打开SQLiteDB
+ */
+const openSQLiteDB = async() => {
+    const db = await open({
+        filename: sqliteFile,
+        driver: sqlite3.cached.Database
+    });
+    return db;
+}
 
 /**
  * 获取本地服务内网IP地址，注册服务时需使用
