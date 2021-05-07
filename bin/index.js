@@ -30,9 +30,6 @@ const sqliteDB = dblite(sqlitePath);
 const memoryDB = dblite(':memory:');
 const port = config().service.portNumber || 3000;
 const logger = console;
-
-
-
 console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
 
 
@@ -76,6 +73,8 @@ const initSqliteDB = async() => {
     const version = config().memorycache.version;
     const keys = Object.keys(cacheddl);
     console.log(`cache ddl #init# >>>>>>>>>>>>>> `);
+
+
 
     (async() => {
         for await (tableName of keys) {
@@ -236,6 +235,8 @@ const startXmysql = async(sqlConfig) => {
     const nacosMiddleware = await middlewareNacos();
     //获取 RPC Server
     const rpcserver = nacosMiddleware.rpcserver;
+    //获取sqlite3DB实例
+    const sqlite3DB = await openSQLiteDB();
 
     //设置express 
     const app = express();
@@ -267,7 +268,7 @@ const startXmysql = async(sqlConfig) => {
     const mysqlPool = mysql.createPool(sqlConfig);
 
     //设置服务器RestAPI Xapi 
-    const moreApis = new Xapi(sqlConfig, mysqlPool, app, sqliteDB, memoryDB);
+    const moreApis = new Xapi(sqlConfig, mysqlPool, app, sqliteDB, memoryDB, sqlite3DB);
 
     moreApis.init((err, results) => {
         // 启动express监听
