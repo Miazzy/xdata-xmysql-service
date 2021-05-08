@@ -112,6 +112,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const cacheddl = config().memorycache.cacheddl;
     const version = config().memorycache.version;
     const sync_interval_milisecond = config().memorycache.sync_interval_milisecond;
+    const batch_num = config().memorycache.batch_num;
     const keys = Object.keys(cacheddl);
 
     console.log(`cache ddl #sync# start >>>>>>>>>>>>>> : ......`, `cache ddl #sync# keys >>>>>>>>>>>>>> :`, keys);
@@ -151,7 +152,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                                 }
                                 (async() => {
                                     console.log(`database> querySQL: ${querySQL} tablename:`, qTableName, ' rows length:', rows.length);
-                                    const pageSize = 1000; // 10条批量执行
+                                    const pageSize = batch_num; // N条批量执行
                                     let page = 1,
                                         maxRow = 0,
                                         maxPage = Math.ceil(rows.length / pageSize);
