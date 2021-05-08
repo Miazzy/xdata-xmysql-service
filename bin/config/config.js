@@ -37,6 +37,12 @@ module.exports = () => {
         db: 0,
     };
 
+    config.redislock = {
+        timeout: 10000,
+        retries: 3,
+        delay: 100,
+    };
+
     config.redisclustr = {
         servers: [{
             host: '172.18.254.95', //127.0.0.1:6379 172.18.254.95:37000
