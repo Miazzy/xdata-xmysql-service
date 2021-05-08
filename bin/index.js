@@ -64,6 +64,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     console.log(`cache ddl #init# >>>>>>>>>>>>>> `);
     //开启分布式锁
     lock.lockExec('app:init_sqlite_db:lock', () => {
+        console.log(`exec into lock which app:init_sqlite_db:lock `);
         (async() => {
             for await (tableName of keys) {
                 const cacheKey = `init_sqlite_${tableName}_${ipaddress}_${version}`;
@@ -118,6 +119,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
 
     //TODO 开启分布式锁 
     lock.lockExec('app:sync_sqlite_db:lock', () => {
+        console.log(`exec into lock which app:sync_sqlite_db:lock `);
         (async() => { //拉取数据库数据
             for await (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
 
@@ -194,43 +196,45 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
  */
 const generateDDL = async(database = 'xdata', tableName = '', pool = { query: () => {} }) => {
 
-        if (tools.isNull(tableName)) {
-            return '';
-        }
-
-        const cacheKey = `generate_sqlite_rows_flag`;
-        const flag = await cache.getValue(cacheKey);
-        const querySQL = "SELECT `c`.`table_name`, `c`.`column_name`, `c`.`ordinal_position`, `c`.`column_key`, `c`.`is_nullable`, `c`.`column_type`, `c`.`column_default` FROM ((`information_schema`.`columns` AS `c` LEFT JOIN `information_schema`.`key_column_usage` AS `k` ON `c`.`column_name` = `k`.`column_name` AND `c`.`table_schema` = `k`.`referenced_table_schema` AND `c`.`table_name` = `k`.`table_name`) LEFT JOIN `information_schema`.`statistics` AS `s` ON `c`.`column_name` = `s`.`column_name` AND `c`.`table_schema` = `s`.`index_schema` AND `c`.`table_name` = `s`.`table_name`) LEFT JOIN `information_schema`.`VIEWS` AS `v` ON `c`.`table_schema` = `v`.`table_schema` AND `c`.`table_name` = `v`.`table_name` WHERE `c`.`table_schema` = ':table_schema' AND `v`.`table_name` IS NULL ORDER BY `c`.`table_name`, `c`.`ordinal_position` ".replace(/:table_schema/g, database);
-
-        let ddlSQL = `CREATE TABLE IF NOT EXISTS ${tableName} ( `;
-
-        pool.query(querySQL, [], (error, rows, _fields) => {
-            cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
-            cache.setValue(cacheKey.replace('_flag', '_value'), JSON.stringify(rows), 3600 * 24 * 365 * 1000);
-        });
-
-        if (flag != 'true') { //查询表字段信息
-            await tools.sleep(15000);
-        }
-
-        let rows = await cache.getValue(cacheKey.replace('_flag', '_value'));
-        rows = JSON.parse(rows);
-
-        //筛选数据，选出表名称的数据
-        rows = rows.filter((item) => {
-            return item['table_name'] == tableName;
-        });
-        rows = rows.filter((item, index) => {
-            const _index = rows.findIndex(elem => { return elem['column_name'] == item['column_name'] })
-            return _index == index;
-        });
-        console.log(`generate create table ddl rows:`, rows);
-        console.error(`generate create table ddl rows:`, rows);
-        //根据表字段数据生成建表语句
-        for (const element of rows) {
-            ddlSQL += ` ${element['column_name']}  ${element['column_type']}  ${element['column_default'] == 'CURRENT_TIMESTAMP' ? ' default CURRENT_TIMESTAMP ': (element['column_type'].includes('char') && !tools.isNull(element['column_default']) ? ` default '${element['column_default']}' ` : (!tools.isNull(element['column_default']) ?  ` default ${element['column_default']} ` : '') ) }   ${element['is_nullable'] == 'YES' ? ' null ' : ' not null ' }  ${element['column_key'] == 'PRI' ? ' primary key ' : ''} \n ,`;
+    if (tools.isNull(tableName)) {
+        return '';
     }
-    ddlSQL = ddlSQL.replace(/,$/gi,"");
+
+    const cacheKey = `generate_sqlite_rows_flag`;
+    const flag = await cache.getValue(cacheKey);
+    const querySQL = "SELECT `c`.`table_name`, `c`.`column_name`, `c`.`ordinal_position`, `c`.`column_key`, `c`.`is_nullable`, `c`.`column_type`, `c`.`column_default` FROM ((`information_schema`.`columns` AS `c` LEFT JOIN `information_schema`.`key_column_usage` AS `k` ON `c`.`column_name` = `k`.`column_name` AND `c`.`table_schema` = `k`.`referenced_table_schema` AND `c`.`table_name` = `k`.`table_name`) LEFT JOIN `information_schema`.`statistics` AS `s` ON `c`.`column_name` = `s`.`column_name` AND `c`.`table_schema` = `s`.`index_schema` AND `c`.`table_name` = `s`.`table_name`) LEFT JOIN `information_schema`.`VIEWS` AS `v` ON `c`.`table_schema` = `v`.`table_schema` AND `c`.`table_name` = `v`.`table_name` WHERE `c`.`table_schema` = ':table_schema' AND `v`.`table_name` IS NULL ORDER BY `c`.`table_name`, `c`.`ordinal_position` ".replace(/:table_schema/g, database);
+
+    let ddlSQL = `CREATE TABLE IF NOT EXISTS ${tableName} ( `;
+
+    pool.query(querySQL, [], (error, rows, _fields) => {
+        cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
+        cache.setValue(cacheKey.replace('_flag', '_value'), JSON.stringify(rows), 3600 * 24 * 365 * 1000);
+    });
+
+    if (flag != 'true') { //查询表字段信息
+        await tools.sleep(15000);
+    }
+
+    let rows = await cache.getValue(cacheKey.replace('_flag', '_value'));
+    rows = JSON.parse(rows);
+
+    //筛选数据，选出表名称的数据
+    rows = rows.filter((item) => {
+        return item['table_name'] == tableName;
+    });
+    rows = rows.filter((item, index) => {
+        const _index = rows.findIndex(elem => { return elem['column_name'] == item['column_name'] })
+        return _index == index;
+    });
+    console.log(`generate create table ddl rows:`, rows);
+    console.error(`generate create table ddl rows:`, rows);
+
+    //根据表字段数据生成建表语句
+    for (const element of rows) {
+        ddlSQL += generateDdlColumn(element);
+    }
+
+    ddlSQL = ddlSQL.replace(/,$/gi, "");
     ddlSQL += ' ) '; // 建表语句封尾
 
     console.log(`generate create table ddl:`, ddlSQL);
@@ -238,6 +242,13 @@ const generateDDL = async(database = 'xdata', tableName = '', pool = { query: ()
     cache.setValue(cacheKey.replace('_flag', '_create_sql'), ddlSQL, 3600 * 24 * 365 * 1000);
 
     return ddlSQL;
+}
+
+const generateDdlColumn = (element) => {
+    const defaultKey = element['column_default'] == 'CURRENT_TIMESTAMP' ? ' default CURRENT_TIMESTAMP ' : (element['column_type'].includes('char') && !tools.isNull(element['column_default']) ? ` default '${element['column_default']}' ` : (!tools.isNull(element['column_default']) ? ` default ${element['column_default']} ` : ''));
+    const nullableKey = element['is_nullable'] == 'YES' ? ' null ' : ' not null ';
+    const primaryKey = element['column_key'] == 'PRI' ? ' primary key ' : '';
+    return ` ${element['column_name']} ${element['column_type']} ${defaultKey} ${nullableKey} ${primaryKey} \n ,`;
 }
 
 /**
