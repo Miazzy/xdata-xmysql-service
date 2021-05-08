@@ -337,13 +337,15 @@ const startXmysql = async(sqlConfig) => {
         // 启动express监听
         app.listen(sqlConfig.portNumber, sqlConfig.ipAddress);
         // 启动本地sqlite，创建表，执行同步语句
-        (async() => {
-            await tools.sleep(memorycacheConfig.init_wait_milisecond || 100); //等待Nms
-            const metaDB = moreApis.getXSQL().getMetaDB();
-            await initSqliteDB(mysqlPool, metaDB); //启动Sqlite本地缓存
-            await tools.sleep(memorycacheConfig.sync_wait_milisecond || 3000); //等待Nms
-            await syncSqliteDB(mysqlPool, metaDB); //同步主数据库数据到sqlite
-        })();
+        lock.lockExec('app:start_sqlite_db:lock', () => {
+            (async() => {
+                await tools.sleep(memorycacheConfig.init_wait_milisecond || 100); //等待Nms
+                const metaDB = moreApis.getXSQL().getMetaDB();
+                await initSqliteDB(mysqlPool, metaDB); //启动Sqlite本地缓存
+                await tools.sleep(memorycacheConfig.sync_wait_milisecond || 3000); //等待Nms
+                await syncSqliteDB(mysqlPool, metaDB); //同步主数据库数据到sqlite
+            })();
+        });
         // 打印启动完毕日志
         console.log("API's base URL: ", nacosMiddleware.ipAddress + ":" + sqlConfig.portNumber);
     });
