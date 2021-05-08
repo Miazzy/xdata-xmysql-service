@@ -90,6 +90,10 @@ module.exports = () => {
 
     config.memorycache = {
         version: 'v2.3.2',
+        init_wait_milisecond: 100,
+        sync_wait_milisecond: 3000,
+        sync_interval_milisecond: 300,
+        trace_sql_flag: false,
         cacheddl: {
             'bs_seal_regist': '',
             'bs_seal_regist_archive': '',

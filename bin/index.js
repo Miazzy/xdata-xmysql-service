@@ -24,6 +24,7 @@ const os = require('os');
 const config = require('./config/config');
 const tools = require('../lib/tools/tools').tools;
 const cache = require('../lib/cache/cache');
+const config = require("./config/config");
 const sqlitePath = `${process.cwd()}/` + config().service.dblitepath;
 const sqliteFile = `${process.cwd()}/` + config().service.sqlitepath;
 const sqliteDB = dblite(sqlitePath);
@@ -37,13 +38,14 @@ console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
  * 打开SQLiteDB
  */
 const openSQLiteDB = async() => {
+    const trace_sql_flag = config().memorycache.trace_sql_flag; //是否trace执行SQL
     const db = await open({
         filename: sqliteFile,
         driver: sqlite3.cached.Database
     });
-    // db.on('trace', (data) => {
-    //     console.info(`sqlite3 trace :`, data);
-    // });
+    db.on('trace', (data) => {
+        trace_sql_flag ? (console.info(`sql_trace> `, data)) : null;
+    });
     return db;
 }
 
@@ -56,6 +58,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const cacheddl = config().memorycache.cacheddl;
     const version = config().memorycache.version;
     const database = config().service.database || 'xdata';
+    const init_wait_milisecond = config().memorycache.init_wait_milisecond;
     const keys = Object.keys(cacheddl);
     console.log(`cache ddl #init# >>>>>>>>>>>>>> `);
 
@@ -85,7 +88,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
             } catch (error) {
                 console.error(`exec ddl error:`, error);
             }
-            await tools.sleep(100);
+            await tools.sleep(init_wait_milisecond);
         }
     })();
 
@@ -106,6 +109,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const ipaddress = tools.getIpAddress();
     const cacheddl = config().memorycache.cacheddl;
     const version = config().memorycache.version;
+    const sync_interval_milisecond = config().memorycache.sync_interval_milisecond;
     const keys = Object.keys(cacheddl);
 
     console.log(`cache ddl #sync# start >>>>>>>>>>>>>> : ......`, `cache ddl #sync# keys >>>>>>>>>>>>>> :`, keys);
@@ -175,7 +179,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                     console.log(`full scale sync error:`, error);
                 }
             }
-            await tools.sleep(300);
+            await tools.sleep(sync_interval_milisecond);
         }
     })();
 }
@@ -272,6 +276,8 @@ const startXmysql = async(sqlConfig) => {
     const protectConfig = config().protect;
     //获取Nacos配置信息
     const nacosConfig = config().nacos;
+    //获取分布式数据库信息
+    const memorycacheConfig = config().memorycache;
 
     //注册Nacos并发布服务，服务名称：xdata-xmysql-service
     const nacosMiddleware = await middlewareNacos();
@@ -317,10 +323,10 @@ const startXmysql = async(sqlConfig) => {
         app.listen(sqlConfig.portNumber, sqlConfig.ipAddress);
         // 启动本地sqlite，创建表，执行同步语句
         (async() => {
-            await tools.sleep(1500); //等待Nms
+            await tools.sleep(memorycacheConfig.init_wait_milisecond || 100); //等待Nms
             const metaDB = moreApis.getXSQL().getMetaDB();
             await initSqliteDB(mysqlPool, metaDB); //启动Sqlite本地缓存
-            await tools.sleep(1500); //等待Nms
+            await tools.sleep(memorycacheConfig.sync_wait_milisecond || 3000); //等待Nms
             await syncSqliteDB(mysqlPool, metaDB); //同步主数据库数据到sqlite
         })();
         // 打印启动完毕日志
