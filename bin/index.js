@@ -62,6 +62,8 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const keys = Object.keys(cacheddl);
     console.log(`cache ddl #init# >>>>>>>>>>>>>> `);
 
+    //TODO 开启分布式锁
+
     (async() => {
         for await (tableName of keys) {
             const cacheKey = `init_sqlite_${tableName}_${ipaddress}_${version}`;
@@ -113,6 +115,8 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const keys = Object.keys(cacheddl);
 
     console.log(`cache ddl #sync# start >>>>>>>>>>>>>> : ......`, `cache ddl #sync# keys >>>>>>>>>>>>>> :`, keys);
+
+    //TODO 开启分布式锁
 
     (async() => { //拉取数据库数据
         for await (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
