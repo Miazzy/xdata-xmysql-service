@@ -100,6 +100,7 @@ module.exports = () => {
         sync_wait_milisecond: 3000,
         sync_interval_milisecond: 300,
         batch_num: 1000,
+        ddl_sqlite_flag: false,
         trace_sql_flag: false,
         cacheddl: {
             'bs_seal_regist': '',

@@ -59,6 +59,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const version = config().memorycache.version;
     const database = config().service.database || 'xdata';
     const init_wait_milisecond = config().memorycache.init_wait_milisecond;
+    const ddl_sqlite_flag = config().memorycache.ddl_sqlite_flag;
     const keys = Object.keys(cacheddl);
     console.log(`cache ddl #init# >>>>>>>>>>>>>> `);
     //开启分布式锁
@@ -78,7 +79,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                 }
                 try {
                     if (flag != `true` && !tools.isNull(initSQL)) { // await sqliteDB.query(initSQL); // memoryDB.query(initSQL);
-                        //sqliteDB.query(initSQL);
+                        ddl_sqlite_flag ? sqliteDB.query(initSQL) : null;
                         sqlite3DB.exec('BEGIN TRANSACTION');
                         sqlite3DB.exec(initSQL);
                         sqlite3DB.exec('COMMIT');
