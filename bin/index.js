@@ -151,7 +151,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                                 }
                                 (async() => {
                                     console.log(`database> querySQL: ${querySQL} tablename:`, qTableName, ' rows length:', rows.length);
-                                    const pageSize = 100; // 10条批量执行
+                                    const pageSize = 1000; // 10条批量执行
                                     let page = 1,
                                         maxRow = 0,
                                         maxPage = Math.ceil(rows.length / pageSize);
