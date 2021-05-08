@@ -78,7 +78,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                 }
                 try {
                     if (flag != `true` && !tools.isNull(initSQL)) { // await sqliteDB.query(initSQL); // memoryDB.query(initSQL);
-                        sqliteDB.query(initSQL);
+                        //sqliteDB.query(initSQL);
                         sqlite3DB.exec('BEGIN TRANSACTION');
                         sqlite3DB.exec(initSQL);
                         sqlite3DB.exec('COMMIT');
