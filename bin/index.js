@@ -62,7 +62,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const keys = Object.keys(cacheddl);
     console.log(`cache ddl #init# >>>>>>>>>>>>>> `);
 
-    //TODO 开启分布式锁
+    //TODO 开启分布式锁 https://github.com/xdata-database-repository/redislock
 
     (async() => {
         for await (tableName of keys) {
@@ -116,7 +116,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
 
     console.log(`cache ddl #sync# start >>>>>>>>>>>>>> : ......`, `cache ddl #sync# keys >>>>>>>>>>>>>> :`, keys);
 
-    //TODO 开启分布式锁
+    //TODO 开启分布式锁 https://github.com/xdata-database-repository/redislock
 
     (async() => { //拉取数据库数据
         for await (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
