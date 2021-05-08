@@ -25,7 +25,6 @@ const config = require('./config/config');
 const tools = require('../lib/tools/tools').tools;
 const cache = require('../lib/cache/cache');
 const lock = require('../lib/lock/redisLock');
-const config = require("./config/config");
 const sqlitePath = `${process.cwd()}/` + config().service.dblitepath;
 const sqliteFile = `${process.cwd()}/` + config().service.sqlitepath;
 const sqliteDB = dblite(sqlitePath);
