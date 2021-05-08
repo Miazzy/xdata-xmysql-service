@@ -203,7 +203,7 @@ const generateDDL = async(database = 'xdata', tableName = '', pool = { query: ()
     const flag = await cache.getValue(cacheKey);
     const querySQL = "SELECT `c`.`table_name`, `c`.`column_name`, `c`.`ordinal_position`, `c`.`column_key`, `c`.`is_nullable`, `c`.`column_type`, `c`.`column_default` FROM ((`information_schema`.`columns` AS `c` LEFT JOIN `information_schema`.`key_column_usage` AS `k` ON `c`.`column_name` = `k`.`column_name` AND `c`.`table_schema` = `k`.`referenced_table_schema` AND `c`.`table_name` = `k`.`table_name`) LEFT JOIN `information_schema`.`statistics` AS `s` ON `c`.`column_name` = `s`.`column_name` AND `c`.`table_schema` = `s`.`index_schema` AND `c`.`table_name` = `s`.`table_name`) LEFT JOIN `information_schema`.`VIEWS` AS `v` ON `c`.`table_schema` = `v`.`table_schema` AND `c`.`table_name` = `v`.`table_name` WHERE `c`.`table_schema` = ':table_schema' AND `v`.`table_name` IS NULL ORDER BY `c`.`table_name`, `c`.`ordinal_position` ".replace(/:table_schema/g, database);
 
-    let ddlSQL = `CREATE TABLE IF NOT EXISTS ${tableName} ( `;
+    let ddlSQL = `CREATE TABLE IF NOT EXISTS ${tableName} ( \n `;
 
     pool.query(querySQL, [], (error, rows, _fields) => {
         cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
