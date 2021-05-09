@@ -342,8 +342,6 @@ const startXmysql = async(sqlConfig) => {
                 const metaDB = moreApis.getXSQL().getMetaDB();
                 await initSqliteDB(mysqlPool, metaDB); //启动Sqlite本地缓存 进行两次建表初始化操作，避免写入操作时出现表不存在的异常
                 await tools.sleep((memorycacheConfig.sync_wait_milisecond || 3000) * 2); //等待Nms
-                await initSqliteDB(mysqlPool, metaDB); //启动Sqlite本地缓存 进行两次建表初始化操作，避免写入操作时出现表不存在的异常
-                await tools.sleep((memorycacheConfig.sync_wait_milisecond || 3000) * 2); //等待Nms
                 await syncSqliteDB(mysqlPool, metaDB); //同步主数据库数据到sqlite
             })();
         });
