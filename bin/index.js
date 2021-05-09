@@ -115,7 +115,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const batch_num = config().memorycache.batch_num;
     const keys = Object.keys(cacheddl);
 
-    const dataPool = (query, params = []) => {
+    const dataQuery = (query, params = []) => {
         return new Promise(function(resolve) {
             pool.query(query, params, (error, rows, _fields) => {
                 resolve(rows);
@@ -153,7 +153,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                     try {
                         //查询主数据库所有数据，全部插入本地数据库中
                         lock.lockExecs(`app:sync_sqlite_db@${tableName}@full@:${ipaddress}:lock`, async() => {
-                            const rows = await dataPool.query(querySQL, []);
+                            const rows = await dataQuery(querySQL, []);
                             console.log(`exec #sync# ${tableName} rows length`, rows.length);
                             try {
                                 if (error) { //如果执行错误，则直接返回
