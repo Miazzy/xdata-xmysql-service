@@ -115,6 +115,14 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const batch_num = config().memorycache.batch_num;
     const keys = Object.keys(cacheddl);
 
+    const dataPool = (query, params = []) => {
+        return new Promise(function(resolve) {
+            pool.query(query, params, (error, rows, _fields) => {
+                resolve(rows);
+            });
+        });
+    }
+
     console.log(`cache ddl #sync# start >>>>>>>>>>>>>> : ......`, `cache ddl #sync# keys >>>>>>>>>>>>>> :`, keys);
 
     //TODO 开启分布式锁 

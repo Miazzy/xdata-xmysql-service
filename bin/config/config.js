@@ -98,8 +98,8 @@ module.exports = () => {
         version: 'v3.0.1',
         init_wait_milisecond: 100,
         sync_wait_milisecond: 5000,
-        sync_interval_milisecond: 1000,
-        batch_num: 1000,
+        sync_interval_milisecond: 100,
+        batch_num: 10000,
         ddl_sqlite_flag: false,
         trace_sql_flag: false,
         cacheddl: {
