@@ -156,10 +156,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                             const rows = await dataQuery(querySQL, []);
                             console.log(`exec #sync# ${tableName} rows length`, rows.length);
                             try {
-                                if (error) { //如果执行错误，则直接返回
-                                    return console.log("mysql sync to sqlite >>>>> ", error);
-                                }
-                                (async() => {
+                                await (async() => {
                                     console.log(`database> querySQL: ${querySQL} tablename:`, qTableName, ' rows length:', rows.length);
                                     const pageSize = batch_num; // N条批量执行
                                     let page = 1,
