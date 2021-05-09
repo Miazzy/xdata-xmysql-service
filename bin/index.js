@@ -336,7 +336,7 @@ const startXmysql = async(sqlConfig) => {
         // 启动express监听
         app.listen(sqlConfig.portNumber, sqlConfig.ipAddress);
         // 启动本地sqlite，创建表，执行同步语句
-        lock.lockExecs(`app:start_sqlite_db:${ipaddress}:lock`, async() => {
+        lock.lockExec(`app:start_sqlite_db:${ipaddress}:lock`, async() => {
             await (async() => {
                 await tools.sleep(memorycacheConfig.init_wait_milisecond || 100); //等待Nms
                 const metaDB = moreApis.getXSQL().getMetaDB();
