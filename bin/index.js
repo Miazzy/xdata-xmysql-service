@@ -141,7 +141,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                     cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
                     const querySQL = `select * from ${tableName} order by id desc `; //需要检查ID是否存在
                     const qTableName = `${tableName}`;
-                    console.log(`exec #sync# tablename#${tableName}# >>>>>>>>>>>>>> :`, keys, ` select sql :`, querySQL);
+                    console.log(`exec #sync# tablename#${tableName}# >>>>>>>>>>>>>> :`, ` select sql :`, querySQL);
                     try {
                         //查询主数据库所有数据，全部插入本地数据库中
                         pool.query(querySQL, [], (error, rows, _fields) => {
