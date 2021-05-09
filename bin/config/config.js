@@ -99,7 +99,7 @@ module.exports = () => {
         init_wait_milisecond: 100,
         sync_wait_milisecond: 5000,
         sync_interval_milisecond: 100,
-        batch_num: 100,
+        batch_num: 10,
         ddl_sqlite_flag: false,
         trace_sql_flag: false,
         cacheddl: {
