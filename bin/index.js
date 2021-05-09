@@ -63,7 +63,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const keys = Object.keys(cacheddl);
     console.log(`cache ddl #init# >>>>>>>>>>>>>> `);
     //开启分布式锁
-    lock.lockExec('app:init_sqlite_db:lock', () => {
+    lock.lockExec('app:init_sqlite_db:lock', async() => {
         console.log(`exec into lock which app:init_sqlite_db:lock `);
         (async() => {
             for await (tableName of keys) {
@@ -119,11 +119,11 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     console.log(`cache ddl #sync# start >>>>>>>>>>>>>> : ......`, `cache ddl #sync# keys >>>>>>>>>>>>>> :`, keys);
 
     //TODO 开启分布式锁 
-    lock.lockExec('app:sync_sqlite_db:lock', () => {
+    lock.lockExec('app:sync_sqlite_db:lock', async() => {
         console.log(`exec into lock which app:sync_sqlite_db:lock `);
         (async() => { //拉取数据库数据
             for await (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
-                lock.lockExec(`app:sync_sqlite_db@${tableName}@:lock`, () => {
+                lock.lockExec(`app:sync_sqlite_db@${tableName}@:lock`, async() => {
                     const cacheKey = `sync_sqlite_${tableName}_${ipaddress}_${version}`;
                     const flag = await cache.getValue(cacheKey);
                     console.log(`cache key: ${cacheKey} flag: ${flag} . `);
@@ -147,7 +147,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                         try {
                             //查询主数据库所有数据，全部插入本地数据库中
                             pool.query(querySQL, [], (error, rows, _fields) => {
-                                lock.lockExec(`app:sync_sqlite_db@${tableName}@full@:lock`, () => {
+                                lock.lockExec(`app:sync_sqlite_db@${tableName}@full@:lock`, async() => {
                                     try {
                                         if (error) { //如果执行错误，则直接返回
                                             return console.log("mysql sync to sqlite >>>>> ", error);
@@ -342,7 +342,7 @@ const startXmysql = async(sqlConfig) => {
         // 启动express监听
         app.listen(sqlConfig.portNumber, sqlConfig.ipAddress);
         // 启动本地sqlite，创建表，执行同步语句
-        lock.lockExec('app:start_sqlite_db:lock', () => {
+        lock.lockExec('app:start_sqlite_db:lock', async() => {
             (async() => {
                 await tools.sleep(memorycacheConfig.init_wait_milisecond || 100); //等待Nms
                 const metaDB = moreApis.getXSQL().getMetaDB();
