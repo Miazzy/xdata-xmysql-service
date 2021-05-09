@@ -95,7 +95,7 @@ module.exports = () => {
     };
 
     config.memorycache = {
-        version: 'v2.4.3',
+        version: 'v2.4.5',
         init_wait_milisecond: 100,
         sync_wait_milisecond: 5000,
         sync_interval_milisecond: 1000,
