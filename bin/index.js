@@ -147,40 +147,42 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                     try {
                         //查询主数据库所有数据，全部插入本地数据库中
                         pool.query(querySQL, [], (error, rows, _fields) => {
-                            try {
-                                if (error) { //如果执行错误，则直接返回
-                                    return console.log("mysql sync to sqlite >>>>> ", error);
-                                }
-                                (async() => {
-                                    console.log(`database> querySQL: ${querySQL} tablename:`, qTableName, ' rows length:', rows.length);
-                                    const pageSize = batch_num; // N条批量执行
-                                    let page = 1,
-                                        maxRow = 0,
-                                        maxPage = Math.ceil(rows.length / pageSize);
-
-                                    sqlite3DB.exec('BEGIN TRANSACTION');
-                                    while (page <= maxPage) {
-                                        try {
-                                            startPage = pageSize * (page - 1);
-                                            maxRow = pageSize * (page - 0);
-                                            const curRows = rows.slice(startPage, maxRow);
-                                            const statement = tools.parseInsertStatement(qTableName, curRows, metaDB);
-                                            let execstr = sqlstring.format(statement.query, statement.params);
-                                            execstr = execstr.replace(/\r|\n/g, ''); //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行 //sqliteDB.query(execstr, [], (err, rows) => { err ? (console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows)) : null; });
-                                            sqlite3DB.exec(execstr); // console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page); //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
-                                        } catch (error) {
-                                            console.log(`sqlite db exec error:`, error);
-                                        } finally {
-                                            ++page;
-                                        }
+                            lock.lockExec('app:sync_sqlite_db@full@:lock', () => {
+                                try {
+                                    if (error) { //如果执行错误，则直接返回
+                                        return console.log("mysql sync to sqlite >>>>> ", error);
                                     }
-                                    sqlite3DB.exec('COMMIT');
-                                    console.log(`database> sync tablename:`, qTableName, ` over ... `);
-                                })();
-                            } catch (error) {
-                                console.log(`sql error:`, error);
-                            }
-                            return true;
+                                    (async() => {
+                                        console.log(`database> querySQL: ${querySQL} tablename:`, qTableName, ' rows length:', rows.length);
+                                        const pageSize = batch_num; // N条批量执行
+                                        let page = 1,
+                                            maxRow = 0,
+                                            maxPage = Math.ceil(rows.length / pageSize);
+
+                                        sqlite3DB.exec('BEGIN TRANSACTION');
+                                        while (page <= maxPage) {
+                                            try {
+                                                startPage = pageSize * (page - 1);
+                                                maxRow = pageSize * (page - 0);
+                                                const curRows = rows.slice(startPage, maxRow);
+                                                const statement = tools.parseInsertStatement(qTableName, curRows, metaDB);
+                                                let execstr = sqlstring.format(statement.query, statement.params);
+                                                execstr = execstr.replace(/\r|\n/g, ''); //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行 //sqliteDB.query(execstr, [], (err, rows) => { err ? (console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows)) : null; });
+                                                sqlite3DB.exec(execstr); // console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page); //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
+                                            } catch (error) {
+                                                console.log(`sqlite db exec error:`, error);
+                                            } finally {
+                                                ++page;
+                                            }
+                                        }
+                                        sqlite3DB.exec('COMMIT');
+                                        console.log(`database> sync tablename:`, qTableName, ` over ... `);
+                                    })();
+                                } catch (error) {
+                                    console.log(`sql error:`, error);
+                                }
+                                return true;
+                            });
                         });
                     } catch (error) {
                         console.log(`full scale sync error:`, error);
