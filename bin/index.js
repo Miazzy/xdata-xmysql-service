@@ -122,73 +122,71 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
         console.log(`exec into lock which app:sync_sqlite_db:lock `);
         (async() => { //拉取数据库数据
             for await (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
-                lock.lockExecs(`app:sync_sqlite_db@${tableName}@:${ipaddress}:lock`, async() => {
-                    const cacheKey = `sync_sqlite_${tableName}_${ipaddress}_${version}`;
-                    const flag = await cache.getValue(cacheKey);
-                    console.log(`cache key: ${cacheKey} flag: ${flag} . `);
-                    if (flag == `true`) { /***************** 方案一 增量 *****************/
-                        try {
-                            //查询本地sqlite数据，获取当前最大值 id , xid
+                const cacheKey = `sync_sqlite_${tableName}_${ipaddress}_${version}`;
+                const flag = await cache.getValue(cacheKey);
+                console.log(`cache key: ${cacheKey} flag: ${flag} . `);
+                if (flag == `true`) { /***************** 方案一 增量 *****************/
+                    try {
+                        //查询本地sqlite数据，获取当前最大值 id , xid
 
-                            //查询主数据库数据库大于当前最大值的数据 id 新增 //将多的数据同步新增过来
+                        //查询主数据库数据库大于当前最大值的数据 id 新增 //将多的数据同步新增过来
 
-                            //查询主数据库数据等于当前最大值得数据 xid 更新 //将多的数据同步更新过来
+                        //查询主数据库数据等于当前最大值得数据 xid 更新 //将多的数据同步更新过来
 
-                            //对小于等于当前最大值的数据，进行检查并更新操作，异步
-                        } catch (error) {
-                            console.log(`increment sync error:`, error);
-                        }
-                    } else { /***************** 方案二 全量 *****************/
-                        cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
-                        const querySQL = `select * from ${tableName} order by id desc `; //需要检查ID是否存在
-                        const qTableName = `${tableName}`;
-                        console.log(`exec #sync# tablename#${tableName}# >>>>>>>>>>>>>> :`, keys, ` select sql :`, querySQL);
-                        try {
-                            //查询主数据库所有数据，全部插入本地数据库中
-                            pool.query(querySQL, [], (error, rows, _fields) => {
-                                lock.lockExecs(`app:sync_sqlite_db@${tableName}@full@:${ipaddress}:lock`, async() => {
-                                    try {
-                                        if (error) { //如果执行错误，则直接返回
-                                            return console.log("mysql sync to sqlite >>>>> ", error);
-                                        }
-                                        (async() => {
-                                            console.log(`database> querySQL: ${querySQL} tablename:`, qTableName, ' rows length:', rows.length);
-                                            const pageSize = batch_num; // N条批量执行
-                                            let page = 1,
-                                                maxRow = 0,
-                                                maxPage = Math.ceil(rows.length / pageSize);
-
-                                            sqlite3DB.exec('BEGIN TRANSACTION');
-                                            while (page <= maxPage) {
-                                                try {
-                                                    startPage = pageSize * (page - 1);
-                                                    maxRow = pageSize * (page - 0);
-                                                    const curRows = rows.slice(startPage, maxRow);
-                                                    const statement = tools.parseInsertStatement(qTableName, curRows, metaDB);
-                                                    let execstr = sqlstring.format(statement.query, statement.params);
-                                                    execstr = execstr.replace(/\r|\n/g, ''); //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行 //sqliteDB.query(execstr, [], (err, rows) => { err ? (console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows)) : null; });
-                                                    sqlite3DB.exec(execstr); // console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page); //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
-                                                } catch (error) {
-                                                    console.log(`sqlite db exec error:`, error);
-                                                } finally {
-                                                    ++page;
-                                                }
-                                            }
-                                            sqlite3DB.exec('COMMIT');
-                                            console.log(`database> sync tablename:`, qTableName, ` over ... `);
-                                        })();
-                                    } catch (error) {
-                                        console.log(`sql error:`, error);
-                                    }
-                                    return true;
-                                });
-                            });
-                        } catch (error) {
-                            console.log(`full scale sync error:`, error);
-                        }
+                        //对小于等于当前最大值的数据，进行检查并更新操作，异步
+                    } catch (error) {
+                        console.log(`increment sync error:`, error);
                     }
-                    await tools.sleep(sync_interval_milisecond);
-                });
+                } else { /***************** 方案二 全量 *****************/
+                    cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
+                    const querySQL = `select * from ${tableName} order by id desc `; //需要检查ID是否存在
+                    const qTableName = `${tableName}`;
+                    console.log(`exec #sync# tablename#${tableName}# >>>>>>>>>>>>>> :`, keys, ` select sql :`, querySQL);
+                    try {
+                        //查询主数据库所有数据，全部插入本地数据库中
+                        pool.query(querySQL, [], (error, rows, _fields) => {
+                            lock.lockExecs(`app:sync_sqlite_db@${tableName}@full@:${ipaddress}:lock`, async() => {
+                                try {
+                                    if (error) { //如果执行错误，则直接返回
+                                        return console.log("mysql sync to sqlite >>>>> ", error);
+                                    }
+                                    (async() => {
+                                        console.log(`database> querySQL: ${querySQL} tablename:`, qTableName, ' rows length:', rows.length);
+                                        const pageSize = batch_num; // N条批量执行
+                                        let page = 1,
+                                            maxRow = 0,
+                                            maxPage = Math.ceil(rows.length / pageSize);
+
+                                        sqlite3DB.exec('BEGIN TRANSACTION');
+                                        while (page <= maxPage) {
+                                            try {
+                                                startPage = pageSize * (page - 1);
+                                                maxRow = pageSize * (page - 0);
+                                                const curRows = rows.slice(startPage, maxRow);
+                                                const statement = tools.parseInsertStatement(qTableName, curRows, metaDB);
+                                                let execstr = sqlstring.format(statement.query, statement.params);
+                                                execstr = execstr.replace(/\r|\n/g, ''); //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行 //sqliteDB.query(execstr, [], (err, rows) => { err ? (console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows)) : null; });
+                                                sqlite3DB.exec(execstr); // console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page); //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
+                                            } catch (error) {
+                                                console.log(`sqlite db exec error:`, error);
+                                            } finally {
+                                                ++page;
+                                            }
+                                        }
+                                        sqlite3DB.exec('COMMIT');
+                                        console.log(`database> sync tablename:`, qTableName, ` over ... `);
+                                    })();
+                                } catch (error) {
+                                    console.log(`sql error:`, error);
+                                }
+                                return true;
+                            });
+                        });
+                    } catch (error) {
+                        console.log(`full scale sync error:`, error);
+                    }
+                }
+                await tools.sleep(sync_interval_milisecond);
             }
         })();
     });
