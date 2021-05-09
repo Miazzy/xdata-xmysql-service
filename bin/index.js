@@ -71,7 +71,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                 const flag = await cache.getValue(cacheKey);
                 let initSQL = cacheddl[tableName];
                 try {
-                    if (tools.isNull(initSQL) || initSQL == 'generate' || initSQL == 'auto') {
+                    if (flag != `true` && (tools.isNull(initSQL) || initSQL == 'generate' || initSQL == 'auto')) {
                         initSQL = await generateDDL(database, tableName, pool);
                     }
                 } catch (error) {
