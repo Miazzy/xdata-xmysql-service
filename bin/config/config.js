@@ -15,7 +15,7 @@ module.exports = () => {
     const config = exports = {};
 
     config.nacos = {
-        registStatus: true,
+        registStatus: false,
         logger: console,
         serverList: ['172.18.1.50:8848', '172.18.1.50:8849', '172.18.1.50:8850'], // replace to real nacos serverList
         namespace: 'public',
@@ -95,7 +95,7 @@ module.exports = () => {
     };
 
     config.memorycache = {
-        version: 'v2.1.1-beta',
+        version: 'v2.1.2-beta',
         init_wait_milisecond: 100,
         sync_wait_milisecond: 5000,
         sync_interval_milisecond: 1000,

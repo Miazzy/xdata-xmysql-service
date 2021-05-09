@@ -240,8 +240,8 @@ const generateDDL = async(database = 'xdata', tableName = '', pool = { query: ()
     ddlSQL = ddlSQL.replace(/,$/gi, "");
     ddlSQL += ' ) '; // 建表语句封尾
 
-    console.log(`generate create table ddl:`, ddlSQL);
-    console.error(`generate create table ddl:`, ddlSQL);
+    //console.log(`generate create table ddl:`, ddlSQL);
+    //console.error(`generate create table ddl:`, ddlSQL);
     cache.setValue(cacheKey.replace('_flag', '_create_sql'), ddlSQL, 3600 * 24 * 365 * 1000);
 
     return ddlSQL;
