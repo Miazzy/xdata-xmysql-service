@@ -63,7 +63,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const keys = Object.keys(cacheddl);
     console.log(`cache ddl #init# >>>>>>>>>>>>>> `);
     //开启分布式锁
-    lock.lockExec('app:init_sqlite_db:lock', async() => {
+    lock.lockExec(`app:init_sqlite_db:${ipaddress}:lock`, async() => {
         console.log(`exec into lock which app:init_sqlite_db:lock `);
         (async() => {
             for await (tableName of keys) {
@@ -119,11 +119,11 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     console.log(`cache ddl #sync# start >>>>>>>>>>>>>> : ......`, `cache ddl #sync# keys >>>>>>>>>>>>>> :`, keys);
 
     //TODO 开启分布式锁 
-    lock.lockExec('app:sync_sqlite_db:lock', async() => {
+    lock.lockExec(`app:sync_sqlite_db:${ipaddress}:lock`, async() => {
         console.log(`exec into lock which app:sync_sqlite_db:lock `);
         (async() => { //拉取数据库数据
             for await (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
-                lock.lockExec(`app:sync_sqlite_db@${tableName}@:lock`, async() => {
+                lock.lockExec(`app:sync_sqlite_db@${tableName}@:${ipaddress}:lock`, async() => {
                     const cacheKey = `sync_sqlite_${tableName}_${ipaddress}_${version}`;
                     const flag = await cache.getValue(cacheKey);
                     console.log(`cache key: ${cacheKey} flag: ${flag} . `);
@@ -147,7 +147,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                         try {
                             //查询主数据库所有数据，全部插入本地数据库中
                             pool.query(querySQL, [], (error, rows, _fields) => {
-                                lock.lockExec(`app:sync_sqlite_db@${tableName}@full@:lock`, async() => {
+                                lock.lockExec(`app:sync_sqlite_db@${tableName}@full@:${ipaddress}:lock`, async() => {
                                     try {
                                         if (error) { //如果执行错误，则直接返回
                                             return console.log("mysql sync to sqlite >>>>> ", error);
@@ -292,19 +292,14 @@ const middlewareNacos = async(req, res, next) => {
  */
 const startXmysql = async(sqlConfig) => {
 
-    //获取安全配置信息
-    const protectConfig = config().protect;
-    //获取Nacos配置信息
-    const nacosConfig = config().nacos;
-    //获取分布式数据库信息
-    const memorycacheConfig = config().memorycache;
+    const ipaddress = tools.getIpAddress(); //获取IP地址
+    const protectConfig = config().protect; //获取安全配置信息
+    const nacosConfig = config().nacos; //获取Nacos配置信息
+    const memorycacheConfig = config().memorycache; //获取分布式数据库信息
+    const nacosMiddleware = await middlewareNacos(); //注册Nacos并发布服务，服务名称：xdata-xmysql-service
+    const rpcserver = nacosMiddleware.rpcserver; //获取 RPC Server
 
-    //注册Nacos并发布服务，服务名称：xdata-xmysql-service
-    const nacosMiddleware = await middlewareNacos();
-    //获取 RPC Server
-    const rpcserver = nacosMiddleware.rpcserver;
-    //获取sqlite3DB实例
-    sqlite3DB = await openSQLiteDB();
+    sqlite3DB = await openSQLiteDB(); //获取sqlite3DB实例
 
     //设置express 
     const app = express();
@@ -342,7 +337,7 @@ const startXmysql = async(sqlConfig) => {
         // 启动express监听
         app.listen(sqlConfig.portNumber, sqlConfig.ipAddress);
         // 启动本地sqlite，创建表，执行同步语句
-        lock.lockExec('app:start_sqlite_db:lock', async() => {
+        lock.lockExec(`app:start_sqlite_db:${ipaddress}:lock`, async() => {
             (async() => {
                 await tools.sleep(memorycacheConfig.init_wait_milisecond || 100); //等待Nms
                 const metaDB = moreApis.getXSQL().getMetaDB();
