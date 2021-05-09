@@ -114,6 +114,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const sync_interval_milisecond = config().memorycache.sync_interval_milisecond;
     const batch_num = config().memorycache.batch_num;
     const keys = Object.keys(cacheddl);
+    const database = config().service.database || 'xdata';
 
     const dataQuery = (query, params = []) => {
         return new Promise(function(resolve) {
@@ -146,6 +147,15 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                         console.log(`increment sync error:`, error);
                     }
                 } else { /***************** 方案二 全量 *****************/
+
+                    let initSQL = await generateDDL(database, tableName, pool);
+                    if (!tools.isNull(initSQL)) {
+                        sqlite3DB.exec('BEGIN TRANSACTION');
+                        sqlite3DB.exec(initSQL);
+                        sqlite3DB.exec('COMMIT');
+                        await tools.sleep(sync_interval_milisecond);
+                    }
+
                     cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
                     const querySQL = `select * from ${tableName} order by id desc `; //需要检查ID是否存在
                     const qTableName = `${tableName}`;
