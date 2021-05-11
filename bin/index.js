@@ -80,20 +80,24 @@ const openSQLiteDB = async() => {
     const tablenames = config().memorycache.cacheddl;
     const keys = Object.keys(tablenames);
     for await (const tablename of keys) {
-        const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, tablename);
-        const fileFlag = await isFileExisted(path);
-        if (!fileFlag) {
-            writeFile(path, "");
-            console.log(`sqlite filename:`, path);
+        try {
+            const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, tablename);
+            const fileFlag = await isFileExisted(path);
+            if (!fileFlag) {
+                writeFile(path, "");
+                console.log(`sqlite filename:`, path);
+            }
+            const db = await open({
+                filename: path, //[type].[database].[tablename].sqlite.db
+                driver: sqlite3.cached.Database
+            });
+            db.on('trace', (data) => {
+                trace_sql_flag ? (console.info(`sql_trace> `, data)) : null;
+            });
+            sqliteDBMap.set(`${type}.${database}.${tablename}`, db);
+        } catch (error) {
+            console.error(`sqlite open error>`, error);
         }
-        const db = await open({
-            filename: path, //[type].[database].[tablename].sqlite.db
-            driver: sqlite3.cached.Database
-        });
-        db.on('trace', (data) => {
-            trace_sql_flag ? (console.info(`sql_trace> `, data)) : null;
-        });
-        sqliteDBMap.set(`${type}.${database}.${tablename}`, db);
     }
     return sqliteDBMap;
 }
