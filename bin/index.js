@@ -331,7 +331,11 @@ const generateDDL = async(database = 'xdata', tableName = '', pool = { query: ()
     }
 
     let rows = await cache.getValue(cacheKey.replace('_flag', '_value'));
-    rows = JSON.parse(rows);
+    try {
+        rows = JSON.parse(rows);
+    } catch (error) {
+        console.log(`generate ddl json parse error:`, error);
+    }
 
     //筛选数据，选出表名称的数据
     rows = rows.filter((item) => {
