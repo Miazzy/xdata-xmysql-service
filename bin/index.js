@@ -54,6 +54,22 @@ const writeFile = function(path, buffer, callback = (e) => { console.log(e) }) {
     });
 }
 
+/** 
+ * 判断文件是否存在的函数 
+ * @param {*} path_way, 文件路径
+ */
+function isFileExisted(path_way) {
+    return new Promise((resolve, reject) => {
+        fs.access(path_way, (err) => {
+            if (err) {
+                reject(false); //"不存在"
+            } else {
+                resolve(true); //"存在"
+            }
+        })
+    })
+};
+
 /**
  * 打开SQLiteDB
  */
@@ -65,8 +81,11 @@ const openSQLiteDB = async() => {
     const keys = Object.keys(tablenames);
     for await (const tablename of keys) {
         const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, tablename);
-        console.log(`sqlite filename:`, path);
-        writeFile(path, "");
+        const fileFlag = await isFileExisted(path);
+        if (!fileFlag) {
+            writeFile(path, "");
+            console.log(`sqlite filename:`, path);
+        }
         const db = await open({
             filename: path, //[type].[database].[tablename].sqlite.db
             driver: sqlite3.cached.Database
