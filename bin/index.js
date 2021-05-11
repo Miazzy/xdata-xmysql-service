@@ -21,6 +21,7 @@ const numCPUs = require("os").cpus().length;
 const requestIp = require('request-ip');
 const nacos = require('nacos');
 const os = require('os');
+const fs = require('fs');
 const config = require('./config/config');
 const tools = require('../lib/tools/tools').tools;
 const cache = require('../lib/cache/cache');
@@ -35,6 +36,24 @@ const logger = console;
 sqlite3.verbose();
 console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
 
+
+/**
+ * 创建指定路径文件
+ * @param {*} path 
+ * @param {*} buffer 
+ * @param {*} callback 
+ */
+const writeFile = function(path, buffer, callback = (e) => { console.log(e) }) {
+    let lastPath = path.substring(0, path.lastIndexOf("/"));
+    fs.mkdir(lastPath, { recursive: true }, (err) => {
+        if (err) return callback(err);
+        fs.writeFile(path, buffer, function(err) {
+            if (err) return callback(err);
+            return callback(null);
+        });
+    });
+}
+
 /**
  * 打开SQLiteDB
  */
@@ -45,8 +64,10 @@ const openSQLiteDB = async() => {
     const tablenames = config().memorycache.cacheddl;
     const keys = Object.keys(tablenames);
     for await (const tablename of keys) {
+        const path = sqliteFile.replace(/[type]/g, type).replace(/[database]/g, database).replace(/[tablename]/g, tablename);
+        writeFile(path, "");
         const db = await open({
-            filename: sqliteFile.replace(/[type]/g, type).replace(/[database]/g, database).replace(/[tablename]/g, tablename), //[type].[database].[tablename].sqlite.db
+            filename: path, //[type].[database].[tablename].sqlite.db
             driver: sqlite3.cached.Database
         });
         db.on('trace', (data) => {
