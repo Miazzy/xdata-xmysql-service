@@ -297,9 +297,7 @@ const generateDDL = async(database = 'xdata', tableName = '', pool = { query: ()
     rows = rows.filter((item, index) => {
         const _index = rows.findIndex(elem => { return elem['column_name'] == item['column_name'] })
         return _index == index;
-    });
-    // console.log(`generate create table ddl rows:`, rows);
-    // console.error(`generate create table ddl rows:`, rows);
+    }); // console.log(`generate create table ddl rows:`, rows); // console.error(`generate create table ddl rows:`, rows);
 
     //根据表字段数据生成建表语句
     for (const element of rows) {
@@ -309,8 +307,7 @@ const generateDDL = async(database = 'xdata', tableName = '', pool = { query: ()
     ddlSQL = ddlSQL.replace(/,$/gi, "");
     ddlSQL += ' ) '; // 建表语句封尾
 
-    //console.log(`generate create table ddl:`, ddlSQL);
-    //console.error(`generate create table ddl:`, ddlSQL);
+    //console.log(`generate create table ddl:`, ddlSQL); //console.error(`generate create table ddl:`, ddlSQL);
     cache.setValue(cacheKey.replace('_flag', '_create_sql'), ddlSQL, 3600 * 24 * 365 * 1000);
 
     return ddlSQL;
