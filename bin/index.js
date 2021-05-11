@@ -27,6 +27,7 @@ const config = require('./config/config');
 const tools = require('../lib/tools/tools').tools;
 const cache = require('../lib/cache/cache');
 const lock = require('../lib/lock/redisLock');
+const filesystem = require('../lib/filesystem/filesystem');
 const sqlitePath = `${process.cwd()}/` + config().service.dblitepath;
 const sqliteFile = `${process.cwd()}/` + config().service.sqlitepath;
 const sqliteDB = dblite(sqlitePath);
@@ -38,38 +39,6 @@ const logger = console;
 sqlite3.verbose();
 console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
 
-/**
- * 创建指定路径文件
- * @param {*} path 
- * @param {*} buffer 
- * @param {*} callback 
- */
-const writeFile = (path, buffer, callback = (e) => { console.log(e) }) => {
-    let lastPath = path.substring(0, path.lastIndexOf("/"));
-    fs.mkdir(lastPath, { recursive: true }, (err) => {
-        if (err) return callback(err);
-        fs.writeFile(path, buffer, function(err) {
-            if (err) return callback(err);
-            return callback(null);
-        });
-    });
-}
-
-/** 
- * 判断文件是否存在的函数 
- * @param {*} path, 文件路径
- */
-const isFileExisted = (path) => {
-    return new Promise((resolve, reject) => {
-        fs.access(path, (err) => {
-            if (err) {
-                resolve(false); //"不存在"
-            } else {
-                resolve(true); //"存在"
-            }
-        })
-    });
-};
 
 /**
  * 打开SQLiteDB
@@ -83,9 +52,9 @@ const openSQLiteDB = async() => {
     for await (const tablename of keys) {
         try {
             const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, tablename);
-            const fileFlag = await isFileExisted(path);
+            const fileFlag = await filesystem.isFileExisted(path);
             if (!fileFlag) {
-                writeFile(path, "");
+                filesystem.writeFile(path, "");
                 console.log(`sqlite filename:`, path);
             }
             const db = await open({
@@ -111,9 +80,9 @@ const openSQLiteDB = async() => {
  */
 const openSingleDB = async(type, database, qTableName) => {
     const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, qTableName);
-    const fileFlag = await isFileExisted(path);
+    const fileFlag = await filesystem.isFileExisted(path);
     if (!fileFlag) {
-        writeFile(path, "");
+        filesystem.writeFile(path, "");
         console.log(`open single db by sqlite filename:`, path);
     }
     const db = await open({
@@ -218,7 +187,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                 const cacheKey = `sync_sqlite_${qTableName}_${ipaddress}_${version}`;
                 const flag = await cache.getValue(cacheKey); // console.log(`cache key: ${cacheKey} flag: ${flag} . `);
                 const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, `${tableName}`);
-                const fileFlag = await isFileExisted(path);
+                const fileFlag = await filesystem.isFileExisted(path);
                 let initSQL = await generateDDL(database, qTableName, pool);
 
                 const db = sqliteDBMap.get(`${type}.${database}.${qTableName}`);
