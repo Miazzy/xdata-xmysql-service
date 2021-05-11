@@ -222,7 +222,6 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                                     let page = 1,
                                         maxRow = 0,
                                         maxPage = Math.ceil(rows.length / pageSize);
-
                                     sqliteDBMap.get(`${type}.${database}.${qTableName}`).run('BEGIN TRANSACTION');
                                     while (page <= maxPage) {
                                         try {
@@ -230,10 +229,9 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                                             maxRow = pageSize * (page - 0);
                                             const curRows = rows.slice(startPage, maxRow);
                                             const statement = tools.parseInsertSQL(qTableName, curRows, metaDB);
-                                            // let execstr = sqlstring.format(statement.query, statement.params);
-                                            // execstr = execstr.replace(/\r|\n/g, '').replace(/INSERT INTO/g, 'INSERT OR REPLACE INTO'); //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行 //sqliteDB.query(execstr, [], (err, rows) => { err ? (console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows)) : null; });
-                                            sqliteDBMap.get(`${type}.${database}.${qTableName}`).run(statement.query, statement.params).catch((error) => { console.error(`sync_exec_sql>`, execstr, `\nerror>`, error) }); // console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page); //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
-                                            // console.log(`query:`, statement.query, ` params:`, statement.params);
+                                            let execstr = sqlstring.format(statement.query, statement.params);
+                                            execstr = execstr.replace(/\r|\n/g, '').replace(/INSERT INTO/g, 'INSERT OR REPLACE INTO'); //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行 //sqliteDB.query(execstr, [], (err, rows) => { err ? (console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows)) : null; });
+                                            sqliteDBMap.get(`${type}.${database}.${qTableName}`).run(statement.query, statement.params).catch((error) => { console.error(`sync_exec_sql>`, execstr, ` statement>`, statement, `\nerror>`, error) }); // console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page); //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page); // console.log(`query:`, statement.query, ` params:`, statement.params);
                                         } catch (error) {
                                             console.log(`sqlite db exec error:`, error);
                                         } finally {
