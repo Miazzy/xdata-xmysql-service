@@ -44,7 +44,7 @@ console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
  * @param {*} buffer 
  * @param {*} callback 
  */
-const writeFile = function(path, buffer, callback = (e) => { console.log(e) }) {
+const writeFile = (path, buffer, callback = (e) => { console.log(e) }) => {
     let lastPath = path.substring(0, path.lastIndexOf("/"));
     fs.mkdir(lastPath, { recursive: true }, (err) => {
         if (err) return callback(err);
@@ -59,7 +59,7 @@ const writeFile = function(path, buffer, callback = (e) => { console.log(e) }) {
  * 判断文件是否存在的函数 
  * @param {*} path, 文件路径
  */
-function isFileExisted(path) {
+const isFileExisted = (path) => {
     return new Promise((resolve, reject) => {
         fs.access(path, (err) => {
             if (err) {
@@ -68,7 +68,7 @@ function isFileExisted(path) {
                 resolve(true); //"存在"
             }
         })
-    })
+    });
 };
 
 /**
