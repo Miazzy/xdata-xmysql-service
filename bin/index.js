@@ -253,7 +253,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                             return true;
                         });
                     } catch (error) {
-                        console.log(`full scale sync error:`, error);
+                        console.log(`increment sync full scale error:`, error);
                     }
                 } else { /***************** 方案二 全量 *****************/
 
