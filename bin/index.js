@@ -20,6 +20,7 @@ const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
 const requestIp = require('request-ip');
 const nacos = require('nacos');
+const schedule = require('node-schedule');
 const os = require('os');
 const fs = require('fs');
 const config = require('./config/config');
@@ -32,6 +33,7 @@ const sqliteDB = dblite(sqlitePath);
 const memoryDB = dblite(':memory:');
 const port = config().service.portNumber || 3000;
 const sqliteDBMap = new Map();
+const databaseMap = new Map();
 const logger = console;
 sqlite3.verbose();
 console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
@@ -389,6 +391,7 @@ const startXmysql = async(sqlConfig) => {
 
     //设置mysql连接池 
     const mysqlPool = mysql.createPool(sqlConfig);
+    databaseMap.set('mysql_pool_info', mysqlPool);
 
     //设置服务器RestAPI Xapi 
     const moreApis = new Xapi(sqlConfig, mysqlPool, app, sqliteDB, memoryDB, sqliteDBMap);
@@ -401,11 +404,23 @@ const startXmysql = async(sqlConfig) => {
             await (async() => {
                 await tools.sleep(memorycacheConfig.init_wait_milisecond || 100); //等待Nms
                 const metaDB = moreApis.getXSQL().getMetaDB();
+                databaseMap.set('meta_db_info', metaDB);
                 await initSqliteDB(mysqlPool, metaDB, sqliteDBMap); //启动Sqlite本地缓存 进行两次建表初始化操作，避免写入操作时出现表不存在的异常
                 await tools.sleep((memorycacheConfig.sync_wait_milisecond || 3000) * 2); //等待Nms
                 await syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
             })();
             await tools.sleep((memorycacheConfig.sync_wait_milisecond || 3000) * 2); //等待Nms
+        });
+        const task = schedule.scheduleJob('*/30 * * * *', function() {
+            lock.lockExec(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock`, async() => {
+                await (async() => {
+                    const mysqlPool = databaseMap.get('mysql_pool_info');
+                    const metaDB = moreApis.getXSQL().getMetaDB();
+                    const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap();
+                    await syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
+                })();
+                console.log(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock exec over ... `);
+            });
         });
         // 打印启动完毕日志
         console.log("API's base URL: ", nacosMiddleware.ipAddress + ":" + sqlConfig.portNumber);
