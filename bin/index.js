@@ -64,7 +64,8 @@ const openSQLiteDB = async() => {
     const tablenames = config().memorycache.cacheddl;
     const keys = Object.keys(tablenames);
     for await (const tablename of keys) {
-        const path = sqliteFile.replace(/[type]/g, type).replace(/[database]/g, database).replace(/[tablename]/g, tablename);
+        const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, tablename);
+        console.log(`sqlite filename:`, path);
         writeFile(path, "");
         const db = await open({
             filename: path, //[type].[database].[tablename].sqlite.db

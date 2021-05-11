@@ -84,7 +84,7 @@ module.exports = () => {
         useCpuCores: '0', // use number of CPU cores (using cluster) / 1 by default "-c, --useCpuCores <n>"
         commonCacheTime: 1,
         dblitepath: './database/db.sqlite.db',
-        sqlitepath: './database/[type].[database].[tablename].sqlite.db', // [database].[tablename].sqlite.db
+        sqlitepath: './database/{type}.{database}.{tablename}.sqlite.db', // [database].[tablename].sqlite.db
     };
 
     config.slaves = {
@@ -96,7 +96,7 @@ module.exports = () => {
     };
 
     config.memorycache = {
-        version: 'v3.1.2',
+        version: 'v3.1.4',
         init_wait_milisecond: 100,
         sync_wait_milisecond: 5000,
         sync_interval_milisecond: 100,
