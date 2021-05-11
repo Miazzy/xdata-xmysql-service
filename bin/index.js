@@ -56,11 +56,11 @@ const writeFile = function(path, buffer, callback = (e) => { console.log(e) }) {
 
 /** 
  * 判断文件是否存在的函数 
- * @param {*} path_way, 文件路径
+ * @param {*} path, 文件路径
  */
-function isFileExisted(path_way) {
+function isFileExisted(path) {
     return new Promise((resolve, reject) => {
-        fs.access(path_way, (err) => {
+        fs.access(path, (err) => {
             if (err) {
                 reject(false); //"不存在"
             } else {
