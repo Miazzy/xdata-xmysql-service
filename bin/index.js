@@ -104,6 +104,29 @@ const openSQLiteDB = async() => {
 }
 
 /**
+ * 打开单个Sqlite数据库文件
+ * @param {*} type 
+ * @param {*} database 
+ * @param {*} qTableName 
+ */
+const openSingleDB = async(type, database, qTableName) => {
+    const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, qTableName);
+    const fileFlag = await isFileExisted(path);
+    if (!fileFlag) {
+        writeFile(path, "");
+        console.log(`open single db by sqlite filename:`, path);
+    }
+    const db = await open({
+        filename: path,
+        driver: sqlite3.cached.Database
+    });
+    db.on('trace', (data) => {
+        trace_sql_flag ? (console.info(`sql_trace> `, data)) : null;
+    });
+    sqliteDBMap.set(`${type}.${database}.${qTableName}`, db);
+}
+
+/**
  * 初始化sqliteDB
  */
 const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap) => {
@@ -127,6 +150,10 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                 const flag = await cache.getValue(cacheKey);
                 let initSQL = cacheddl[qTableName];
                 try {
+                    const db = sqliteDBMap.get(`${type}.${database}.${qTableName}`);
+                    if (typeof db == 'undefined' || db == null || db == undefined || db == '') {
+                        await openSingleDB(type, database, qTableName);
+                    }
                     if (flag != `true` && (tools.isNull(initSQL) || initSQL == 'generate' || initSQL == 'auto')) {
                         initSQL = await generateDDL(database, qTableName, pool);
                     }
@@ -194,6 +221,10 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                 const fileFlag = await isFileExisted(path);
                 let initSQL = await generateDDL(database, qTableName, pool);
 
+                const db = sqliteDBMap.get(`${type}.${database}.${qTableName}`);
+                if (typeof db == 'undefined' || db == null || db == undefined || db == '') {
+                    await openSingleDB(type, database, qTableName);
+                }
                 if (!tools.isNull(initSQL)) {
                     sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('BEGIN TRANSACTION');
                     sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec(initSQL);
