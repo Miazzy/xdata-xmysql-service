@@ -62,7 +62,7 @@ function isFileExisted(path) {
     return new Promise((resolve, reject) => {
         fs.access(path, (err) => {
             if (err) {
-                reject(false); //"不存在"
+                resolve(false); //"不存在"
             } else {
                 resolve(true); //"存在"
             }
@@ -80,20 +80,24 @@ const openSQLiteDB = async() => {
     const tablenames = config().memorycache.cacheddl;
     const keys = Object.keys(tablenames);
     for await (const tablename of keys) {
-        const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, tablename);
-        const fileFlag = await isFileExisted(path);
-        if (!fileFlag) {
-            writeFile(path, "");
-            console.log(`sqlite filename:`, path);
+        try {
+            const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, tablename);
+            const fileFlag = await isFileExisted(path);
+            if (!fileFlag) {
+                writeFile(path, "");
+                console.log(`sqlite filename:`, path);
+            }
+            const db = await open({
+                filename: path, //[type].[database].[tablename].sqlite.db
+                driver: sqlite3.cached.Database
+            });
+            db.on('trace', (data) => {
+                trace_sql_flag ? (console.info(`sql_trace> `, data)) : null;
+            });
+            sqliteDBMap.set(`${type}.${database}.${tablename}`, db);
+        } catch (error) {
+            console.error(`sqlite open error>`, error);
         }
-        const db = await open({
-            filename: path, //[type].[database].[tablename].sqlite.db
-            driver: sqlite3.cached.Database
-        });
-        db.on('trace', (data) => {
-            trace_sql_flag ? (console.info(`sql_trace> `, data)) : null;
-        });
-        sqliteDBMap.set(`${type}.${database}.${tablename}`, db);
     }
     return sqliteDBMap;
 }
@@ -182,9 +186,10 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
         (async() => { //拉取数据库数据
             for await (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
                 const cacheKey = `sync_sqlite_${tableName}_${ipaddress}_${version}`;
-                const flag = await cache.getValue(cacheKey);
-                console.log(`cache key: ${cacheKey} flag: ${flag} . `);
-                if (flag == `true`) { /***************** 方案一 增量 *****************/
+                const flag = await cache.getValue(cacheKey); // console.log(`cache key: ${cacheKey} flag: ${flag} . `);
+                const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, `${tableName}`);
+                const fileFlag = await isFileExisted(path);
+                if (flag == `true` && fileFlag) { /***************** 方案一 增量 *****************/
                     try {
                         //查询本地sqlite数据，获取当前最大值 id , xid
 
