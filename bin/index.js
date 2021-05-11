@@ -213,6 +213,48 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                     } catch (error) {
                         console.log(`increment sync error:`, error);
                     }
+
+                    const querySQL = `select * from ${qTableName} order by id desc `; //需要检查ID是否存在
+                    console.log(`exec #sync# tablename#${qTableName}# >>>>>>>>>>>>>> :`, ` select sql :`, querySQL);
+                    try {
+                        //查询主数据库所有数据，全部插入本地数据库中
+                        lock.lockExecs(`app:sync_sqlite_db@${qTableName}@full@:${ipaddress}:${version}:lock`, async() => {
+                            const rows = await dataQuery(querySQL, []);
+                            console.log(`exec #sync# ${qTableName} rows length`, rows.length);
+                            try {
+                                await (async() => {
+                                    console.log(`database> querySQL: ${querySQL} tablename:`, qTableName, ' rows length:', rows.length);
+                                    const pageSize = batch_num; // N条批量执行
+                                    let page = 1,
+                                        maxRow = 0,
+                                        maxPage = Math.ceil(rows.length / pageSize);
+                                    sqliteDBMap.get(`${type}.${database}.${qTableName}`).run('BEGIN TRANSACTION');
+                                    while (page <= maxPage) {
+                                        try {
+                                            startPage = pageSize * (page - 1);
+                                            maxRow = pageSize * (page - 0);
+                                            const curRows = rows.slice(startPage, maxRow);
+                                            const statement = tools.parseInsertSQL(qTableName, curRows, metaDB);
+                                            let execstr = sqlstring.format(statement.query, statement.params);
+                                            execstr = execstr.replace(/\r|\n/g, '').replace(/INSERT INTO/g, 'INSERT OR REPLACE INTO'); //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行 //sqliteDB.query(execstr, [], (err, rows) => { err ? (console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows)) : null; });
+                                            sqliteDBMap.get(`${type}.${database}.${qTableName}`).run(statement.query, statement.params).catch((error) => { console.error(`sync_exec_sql>`, statement.query, ` \nstatement>`, JSON.stringify(statement.params), `\nerror>`, error) }); // console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page); //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page); // console.log(`query:`, statement.query, ` params:`, statement.params);
+                                        } catch (error) {
+                                            console.log(`sqlite db exec error:`, error);
+                                        } finally {
+                                            ++page;
+                                        }
+                                    }
+                                    sqliteDBMap.get(`${type}.${database}.${qTableName}`).run('COMMIT');
+                                    console.log(`database> sync tablename:`, qTableName, ` over ... `);
+                                })();
+                            } catch (error) {
+                                console.log(`sql error:`, error);
+                            }
+                            return true;
+                        });
+                    } catch (error) {
+                        console.log(`full scale sync error:`, error);
+                    }
                 } else { /***************** 方案二 全量 *****************/
 
                     cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
