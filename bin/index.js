@@ -36,7 +36,6 @@ const logger = console;
 sqlite3.verbose();
 console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
 
-
 /**
  * 创建指定路径文件
  * @param {*} path 
@@ -371,11 +370,7 @@ const startXmysql = async(sqlConfig) => {
     app.use(morgan("tiny"));
     app.use(cors());
     app.use(bodyParser.json());
-    app.use(
-        bodyParser.urlencoded({
-            extended: true
-        })
-    );
+    app.use(bodyParser.urlencoded({ extended: true }));
 
     // 新增防止SQL注入检测
     if (protectConfig.sqlInjection) {
