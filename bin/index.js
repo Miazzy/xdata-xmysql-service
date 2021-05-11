@@ -198,23 +198,23 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                     }
                 } else { /***************** 方案二 全量 *****************/
 
-                    let initSQL = await generateDDL(database, tableName, pool);
+                    const qTableName = `${tableName}`;
+                    let initSQL = await generateDDL(database, qTableName, pool);
                     if (!tools.isNull(initSQL)) {
-                        sqliteDBMap.get(`${type}.${database}.${tableName}`).exec('BEGIN TRANSACTION');
-                        sqliteDBMap.get(`${type}.${database}.${tableName}`).exec(initSQL);
-                        sqliteDBMap.get(`${type}.${database}.${tableName}`).exec('COMMIT');
+                        sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('BEGIN TRANSACTION');
+                        sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec(initSQL);
+                        sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('COMMIT');
                         await tools.sleep(sync_interval_milisecond);
                     }
 
                     cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
-                    const querySQL = `select * from ${tableName} order by id desc `; //需要检查ID是否存在
-                    const qTableName = `${tableName}`;
-                    console.log(`exec #sync# tablename#${tableName}# >>>>>>>>>>>>>> :`, ` select sql :`, querySQL);
+                    const querySQL = `select * from ${qTableName} order by id desc `; //需要检查ID是否存在
+                    console.log(`exec #sync# tablename#${qTableName}# >>>>>>>>>>>>>> :`, ` select sql :`, querySQL);
                     try {
                         //查询主数据库所有数据，全部插入本地数据库中
-                        lock.lockExecs(`app:sync_sqlite_db@${tableName}@full@:${ipaddress}:${version}:lock`, async() => {
+                        lock.lockExecs(`app:sync_sqlite_db@${qTableName}@full@:${ipaddress}:${version}:lock`, async() => {
                             const rows = await dataQuery(querySQL, []);
-                            console.log(`exec #sync# ${tableName} rows length`, rows.length);
+                            console.log(`exec #sync# ${qTableName} rows length`, rows.length);
                             try {
                                 await (async() => {
                                     console.log(`database> querySQL: ${querySQL} tablename:`, qTableName, ' rows length:', rows.length);
@@ -223,7 +223,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                                         maxRow = 0,
                                         maxPage = Math.ceil(rows.length / pageSize);
 
-                                    sqliteDBMap.get(`${type}.${database}.${tableName}`).exec('BEGIN TRANSACTION');
+                                    sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('BEGIN TRANSACTION');
                                     while (page <= maxPage) {
                                         try {
                                             startPage = pageSize * (page - 1);
@@ -232,14 +232,14 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                                             const statement = tools.parseInsertStatement(qTableName, curRows, metaDB);
                                             let execstr = sqlstring.format(statement.query, statement.params);
                                             execstr = execstr.replace(/\r|\n/g, '').replace(/INSERT INTO/g, 'INSERT OR REPLACE INTO'); //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行 //sqliteDB.query(execstr, [], (err, rows) => { err ? (console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows)) : null; });
-                                            sqliteDBMap.get(`${type}.${database}.${tableName}`).exec(execstr).catch((error) => { console.error(`sync_exec_sql>`, execstr, `\nerror>`, error) }); // console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page); //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
+                                            sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec(execstr).catch((error) => { console.error(`sync_exec_sql>`, execstr, `\nerror>`, error) }); // console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page); //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
                                         } catch (error) {
                                             console.log(`sqlite db exec error:`, error);
                                         } finally {
                                             ++page;
                                         }
                                     }
-                                    sqliteDBMap.get(`${type}.${database}.${tableName}`).exec('COMMIT');
+                                    sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('COMMIT');
                                     console.log(`database> sync tablename:`, qTableName, ` over ... `);
                                 })();
                             } catch (error) {
