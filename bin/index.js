@@ -121,12 +121,13 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
         console.log(`exec into lock which app:init_sqlite_db:lock `);
         (async() => {
             for await (tableName of keys) {
-                const cacheKey = `init_sqlite_${tableName}_${ipaddress}_${version}`;
+                const qTableName = `${tableName}`;
+                const cacheKey = `init_sqlite_${qTableName}_${ipaddress}_${version}`;
                 const flag = await cache.getValue(cacheKey);
-                let initSQL = cacheddl[tableName];
+                let initSQL = cacheddl[qTableName];
                 try {
                     if (flag != `true` && (tools.isNull(initSQL) || initSQL == 'generate' || initSQL == 'auto')) {
-                        initSQL = await generateDDL(database, tableName, pool);
+                        initSQL = await generateDDL(database, qTableName, pool);
                     }
                 } catch (error) {
                     console.error(`generate ddl error:`, error);
@@ -134,9 +135,9 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                 try {
                     if (flag != `true` && !tools.isNull(initSQL)) { // await sqliteDB.query(initSQL); // memoryDB.query(initSQL);
                         ddl_sqlite_flag ? sqliteDB.query(initSQL) : null;
-                        sqliteDBMap.get(`${type}.${database}.${tableName}`).exec('BEGIN TRANSACTION');
-                        sqliteDBMap.get(`${type}.${database}.${tableName}`).exec(initSQL);
-                        sqliteDBMap.get(`${type}.${database}.${tableName}`).exec('COMMIT');
+                        sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('BEGIN TRANSACTION');
+                        sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec(initSQL);
+                        sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('COMMIT');
                         cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000); //console.error(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
                     }
                 } catch (error) {
@@ -185,11 +186,11 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
         console.log(`exec into lock which app:sync_sqlite_db:lock `);
         (async() => { //拉取数据库数据
             for await (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
-                const cacheKey = `sync_sqlite_${tableName}_${ipaddress}_${version}`;
+                const qTableName = `${tableName}`;
+                const cacheKey = `sync_sqlite_${qTableName}_${ipaddress}_${version}`;
                 const flag = await cache.getValue(cacheKey); // console.log(`cache key: ${cacheKey} flag: ${flag} . `);
                 const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, `${tableName}`);
                 const fileFlag = await isFileExisted(path);
-                const qTableName = `${tableName}`;
                 let initSQL = await generateDDL(database, qTableName, pool);
 
                 if (!tools.isNull(initSQL)) {
