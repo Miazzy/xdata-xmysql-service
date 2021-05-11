@@ -189,6 +189,16 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                 const flag = await cache.getValue(cacheKey); // console.log(`cache key: ${cacheKey} flag: ${flag} . `);
                 const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, `${tableName}`);
                 const fileFlag = await isFileExisted(path);
+                const qTableName = `${tableName}`;
+                let initSQL = await generateDDL(database, qTableName, pool);
+
+                if (!tools.isNull(initSQL)) {
+                    sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('BEGIN TRANSACTION');
+                    sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec(initSQL);
+                    sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('COMMIT');
+                    await tools.sleep(sync_interval_milisecond);
+                }
+
                 if (flag == `true` && fileFlag) { /***************** 方案一 增量 *****************/
                     try {
                         //查询本地sqlite数据，获取当前最大值 id , xid
@@ -202,15 +212,6 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                         console.log(`increment sync error:`, error);
                     }
                 } else { /***************** 方案二 全量 *****************/
-
-                    const qTableName = `${tableName}`;
-                    let initSQL = await generateDDL(database, qTableName, pool);
-                    if (!tools.isNull(initSQL)) {
-                        sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('BEGIN TRANSACTION');
-                        sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec(initSQL);
-                        sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('COMMIT');
-                        await tools.sleep(sync_interval_milisecond);
-                    }
 
                     cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
                     const querySQL = `select * from ${qTableName} order by id desc `; //需要检查ID是否存在
