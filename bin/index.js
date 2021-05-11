@@ -186,9 +186,10 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
         (async() => { //拉取数据库数据
             for await (tableName of keys) { // 根据配置参数选择，增量查询或者全量查询
                 const cacheKey = `sync_sqlite_${tableName}_${ipaddress}_${version}`;
-                const flag = await cache.getValue(cacheKey);
-                console.log(`cache key: ${cacheKey} flag: ${flag} . `);
-                if (flag == `true`) { /***************** 方案一 增量 *****************/
+                const flag = await cache.getValue(cacheKey); // console.log(`cache key: ${cacheKey} flag: ${flag} . `);
+                const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, `${tableName}`);
+                const fileFlag = await isFileExisted(path);
+                if (flag == `true` && fileFlag) { /***************** 方案一 增量 *****************/
                     try {
                         //查询本地sqlite数据，获取当前最大值 id , xid
 
