@@ -43,7 +43,7 @@ console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
 /**
  * 打开SQLiteDB
  */
-const openSQLiteDB = async() => {
+const openSQLiteDB = async(sqliteDBMap = new Map()) => {
     const type = config().service.type || 'mysql';
     const database = config().service.database || 'xdata';
     const trace_sql_flag = config().memorycache.trace_sql_flag; //是否trace执行SQL
@@ -78,7 +78,7 @@ const openSQLiteDB = async() => {
  * @param {*} database 
  * @param {*} qTableName 
  */
-const openSingleDB = async(type, database, qTableName) => {
+const openSingleDB = async(type, database, qTableName, sqliteDBMap = new Map()) => {
     const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, qTableName);
     const fileFlag = await filesystem.isFileExisted(path);
     if (!fileFlag) {
@@ -93,12 +93,13 @@ const openSingleDB = async(type, database, qTableName) => {
         trace_sql_flag ? (console.info(`sql_trace> `, data)) : null;
     });
     sqliteDBMap.set(`${type}.${database}.${qTableName}`, db);
+    return sqliteDBMap;
 }
 
 /**
  * 初始化sqliteDB
  */
-const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap) => {
+const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap = new Map()) => {
 
     const ipaddress = tools.getIpAddress();
     const cacheddl = config().memorycache.cacheddl;
@@ -121,7 +122,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
                 try {
                     const db = sqliteDBMap.get(`${type}.${database}.${qTableName}`);
                     if (typeof db == 'undefined' || db == null || db == undefined || db == '') {
-                        await openSingleDB(type, database, qTableName);
+                        await openSingleDB(type, database, qTableName, sqliteDBMap);
                     }
                     if (flag != `true` && (tools.isNull(initSQL) || initSQL == 'generate' || initSQL == 'auto')) {
                         initSQL = await generateDDL(database, qTableName, pool);
@@ -192,7 +193,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap)
 
                 const db = sqliteDBMap.get(`${type}.${database}.${qTableName}`);
                 if (typeof db == 'undefined' || db == null || db == undefined || db == '') {
-                    await openSingleDB(type, database, qTableName);
+                    await openSingleDB(type, database, qTableName, sqliteDBMap);
                 }
                 if (!tools.isNull(initSQL)) {
                     sqliteDBMap.get(`${type}.${database}.${qTableName}`).exec('BEGIN TRANSACTION');
@@ -412,7 +413,7 @@ const startXmysql = async(sqlConfig) => {
     const schedule_task_time = config().memorycache.schedule_task_time;
     const nacosMiddleware = await middlewareNacos(); //注册Nacos并发布服务，服务名称：xdata-xmysql-service
     const rpcserver = nacosMiddleware.rpcserver; //获取 RPC Server
-    const sqliteDBMap = await openSQLiteDB(); //获取sqliteDB实例
+    const sqliteDBMap = await openSQLiteDB(sqliteDBMap); //获取sqliteDB实例
 
     //设置express 
     const app = express();
@@ -423,17 +424,11 @@ const startXmysql = async(sqlConfig) => {
 
     // 新增防止SQL注入检测
     if (protectConfig.sqlInjection) {
-        app.use(protect.express.sqlInjection({
-            body: true,
-            loggerFunction: console.error
-        }));
+        app.use(protect.express.sqlInjection({ body: true, loggerFunction: console.error }));
     }
     // 新增防止XSS跨站攻击
     if (protectConfig.xss) {
-        app.use(protect.express.xss({
-            body: true,
-            loggerFunction: console.error
-        }));
+        app.use(protect.express.xss({ body: true, loggerFunction: console.error }));
     }
 
     //设置mysql连接池 
