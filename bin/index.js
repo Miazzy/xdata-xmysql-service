@@ -405,6 +405,7 @@ const startXmysql = async(sqlConfig) => {
     const nacosConfig = config().nacos; //获取Nacos配置信息
     const memorycacheConfig = config().memorycache; //获取分布式数据库信息
     const version = config().memorycache.version;
+    const schedule = config().memorycache.schedule;
     const nacosMiddleware = await middlewareNacos(); //注册Nacos并发布服务，服务名称：xdata-xmysql-service
     const rpcserver = nacosMiddleware.rpcserver; //获取 RPC Server
     const sqliteDBMap = await openSQLiteDB(); //获取sqliteDB实例
@@ -453,7 +454,7 @@ const startXmysql = async(sqlConfig) => {
             })();
             await tools.sleep((memorycacheConfig.sync_wait_milisecond || 3000) * 2); //等待Nms
         });
-        const task = schedule.scheduleJob('*/30 * * * *', function() {
+        const task = schedule.scheduleJob(schedule, function() {
             lock.lockExec(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock`, async() => {
                 await (async() => {
                     const mysqlPool = databaseMap.get('mysql_pool_info');
