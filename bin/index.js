@@ -62,7 +62,7 @@ function isFileExisted(path) {
     return new Promise((resolve, reject) => {
         fs.access(path, (err) => {
             if (err) {
-                reject(false); //"不存在"
+                resolve(false); //"不存在"
             } else {
                 resolve(true); //"存在"
             }
@@ -81,7 +81,7 @@ const openSQLiteDB = async() => {
     const keys = Object.keys(tablenames);
     for await (const tablename of keys) {
         const path = sqliteFile.replace(/{type}/g, type).replace(/{database}/g, database).replace(/{tablename}/g, tablename);
-        const fileFlag = await isFileExisted(path)();
+        const fileFlag = await isFileExisted(path);
         if (!fileFlag) {
             writeFile(path, "");
             console.log(`sqlite filename:`, path);
