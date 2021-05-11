@@ -83,7 +83,7 @@ module.exports = () => {
         useCpuCores: '0', // use number of CPU cores (using cluster) / 1 by default "-c, --useCpuCores <n>"
         commonCacheTime: 1,
         dblitepath: './database/db.sqlite.db',
-        sqlitepath: './database/db.sqlite3.db',
+        sqlitepath: './database/db.sqlite.db',
     };
 
     config.slaves = {

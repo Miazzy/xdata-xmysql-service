@@ -30,6 +30,7 @@ const sqliteFile = `${process.cwd()}/` + config().service.sqlitepath;
 const sqliteDB = dblite(sqlitePath);
 const memoryDB = dblite(':memory:');
 const port = config().service.portNumber || 3000;
+const sqliteDBMap = new Map();
 const logger = console;
 sqlite3.verbose();
 console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
