@@ -39,25 +39,33 @@ console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
  * 打开SQLiteDB
  */
 const openSQLiteDB = async() => {
+    const type = config().service.type || 'mysql';
+    const database = config().service.database || 'xdata';
     const trace_sql_flag = config().memorycache.trace_sql_flag; //是否trace执行SQL
-    const db = await open({
-        filename: sqliteFile,
-        driver: sqlite3.cached.Database
-    });
-    db.on('trace', (data) => {
-        trace_sql_flag ? (console.info(`sql_trace> `, data)) : null;
-    });
-    return db;
+    const tablenames = config().memorycache.cacheddl;
+    const keys = Object.keys(tablenames);
+    for await (const tablename of keys) {
+        const db = await open({
+            filename: sqliteFile.replace(/[type]/g, type).replace(/[database]/g, database).replace(/[tablename]/g, tablename), //[type].[database].[tablename].sqlite.db
+            driver: sqlite3.cached.Database
+        });
+        db.on('trace', (data) => {
+            trace_sql_flag ? (console.info(`sql_trace> `, data)) : null;
+        });
+        sqliteDBMap.set(`${type}.${database}.${tablename}`, db);
+    }
+    return sqliteDBMap;
 }
 
 /**
  * 初始化sqliteDB
  */
-const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
+const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap) => {
 
     const ipaddress = tools.getIpAddress();
     const cacheddl = config().memorycache.cacheddl;
     const version = config().memorycache.version;
+    const type = config().service.type || 'mysql';
     const database = config().service.database || 'xdata';
     const init_wait_milisecond = config().memorycache.init_wait_milisecond;
     const ddl_sqlite_flag = config().memorycache.ddl_sqlite_flag;
@@ -81,11 +89,10 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                 try {
                     if (flag != `true` && !tools.isNull(initSQL)) { // await sqliteDB.query(initSQL); // memoryDB.query(initSQL);
                         ddl_sqlite_flag ? sqliteDB.query(initSQL) : null;
-                        sqlite3DB.exec('BEGIN TRANSACTION');
-                        sqlite3DB.exec(initSQL);
-                        sqlite3DB.exec('COMMIT');
-                        cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000);
-                        //console.error(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
+                        sqliteDBMap.get(`${type}.${database}.${tableMame}`).exec('BEGIN TRANSACTION');
+                        sqliteDBMap.get(`${type}.${database}.${tableMame}`).exec(initSQL);
+                        sqliteDBMap.get(`${type}.${database}.${tableMame}`).exec('COMMIT');
+                        cache.setValue(cacheKey, `true`, 3600 * 24 * 365 * 1000); //console.error(`cache key: ${cacheKey} flag: ${flag} init sql:`, initSQL);
                     }
                 } catch (error) {
                     console.error(`exec ddl error:`, error);
@@ -101,7 +108,7 @@ const initSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
  * 同步SqliteDB数据库
  * @param {*} pool
  */
-const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
+const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}, sqliteDBMap) => {
 
     //如果没有获取到MetaDB信息，则不能执行
     if (!(metaDB.tables && Object.keys(metaDB.tables).length > 0)) {
@@ -115,6 +122,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
     const sync_interval_milisecond = config().memorycache.sync_interval_milisecond;
     const batch_num = config().memorycache.batch_num;
     const keys = Object.keys(cacheddl);
+    const type = config().service.type || 'mysql';
     const database = config().service.database || 'xdata';
 
     const dataQuery = (query, params = []) => {
@@ -151,9 +159,9 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
 
                     let initSQL = await generateDDL(database, tableName, pool);
                     if (!tools.isNull(initSQL)) {
-                        sqlite3DB.exec('BEGIN TRANSACTION');
-                        sqlite3DB.exec(initSQL);
-                        sqlite3DB.exec('COMMIT');
+                        sqliteDBMap.get(`${type}.${database}.${tableMame}`).exec('BEGIN TRANSACTION');
+                        sqliteDBMap.get(`${type}.${database}.${tableMame}`).exec(initSQL);
+                        sqliteDBMap.get(`${type}.${database}.${tableMame}`).exec('COMMIT');
                         await tools.sleep(sync_interval_milisecond);
                     }
 
@@ -174,7 +182,7 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                                         maxRow = 0,
                                         maxPage = Math.ceil(rows.length / pageSize);
 
-                                    sqlite3DB.exec('BEGIN TRANSACTION');
+                                    sqliteDBMap.get(`${type}.${database}.${tableMame}`).exec('BEGIN TRANSACTION');
                                     while (page <= maxPage) {
                                         try {
                                             startPage = pageSize * (page - 1);
@@ -183,14 +191,14 @@ const syncSqliteDB = async(pool = { query: () => {} }, metaDB = {}) => {
                                             const statement = tools.parseInsertStatement(qTableName, curRows, metaDB);
                                             let execstr = sqlstring.format(statement.query, statement.params);
                                             execstr = execstr.replace(/\r|\n/g, '').replace(/INSERT INTO/g, 'INSERT OR REPLACE INTO'); //执行插入语句前，先查询数据库中是否存在此数据，若存在，则不执行 //sqliteDB.query(execstr, [], (err, rows) => { err ? (console.error(`exec error & sql:`, execstr, ` error:`, err, ` rows:`, curRows)) : null; });
-                                            sqlite3DB.exec(execstr).catch((error) => { console.error(`sync_exec_sql>`, execstr, `\nerror>`, error) }); // console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page); //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
+                                            sqliteDBMap.get(`${type}.${database}.${tableMame}`).exec(execstr).catch((error) => { console.error(`sync_exec_sql>`, execstr, `\nerror>`, error) }); // console.log(`cur rows:`, JSON.stringify(curRows).slice(0, 100), ` page :`, page); //console.log(`statement execstr:`, execstr.slice(0, 100), ` exec success... page: `, page);
                                         } catch (error) {
                                             console.log(`sqlite db exec error:`, error);
                                         } finally {
                                             ++page;
                                         }
                                     }
-                                    sqlite3DB.exec('COMMIT');
+                                    sqliteDBMap.get(`${type}.${database}.${tableMame}`).exec('COMMIT');
                                     console.log(`database> sync tablename:`, qTableName, ` over ... `);
                                 })();
                             } catch (error) {
@@ -312,8 +320,7 @@ const startXmysql = async(sqlConfig) => {
     const version = config().memorycache.version;
     const nacosMiddleware = await middlewareNacos(); //注册Nacos并发布服务，服务名称：xdata-xmysql-service
     const rpcserver = nacosMiddleware.rpcserver; //获取 RPC Server
-
-    sqlite3DB = await openSQLiteDB(); //获取sqlite3DB实例
+    const sqliteDBMap = await openSQLiteDB(); //获取sqliteDB实例
 
     //设置express 
     const app = express();
@@ -345,7 +352,7 @@ const startXmysql = async(sqlConfig) => {
     const mysqlPool = mysql.createPool(sqlConfig);
 
     //设置服务器RestAPI Xapi 
-    const moreApis = new Xapi(sqlConfig, mysqlPool, app, sqliteDB, memoryDB, sqlite3DB);
+    const moreApis = new Xapi(sqlConfig, mysqlPool, app, sqliteDB, memoryDB, sqliteDBMap);
 
     moreApis.init((err, results) => {
         // 启动express监听
@@ -355,9 +362,9 @@ const startXmysql = async(sqlConfig) => {
             await (async() => {
                 await tools.sleep(memorycacheConfig.init_wait_milisecond || 100); //等待Nms
                 const metaDB = moreApis.getXSQL().getMetaDB();
-                await initSqliteDB(mysqlPool, metaDB); //启动Sqlite本地缓存 进行两次建表初始化操作，避免写入操作时出现表不存在的异常
+                await initSqliteDB(mysqlPool, metaDB, sqliteDBMap); //启动Sqlite本地缓存 进行两次建表初始化操作，避免写入操作时出现表不存在的异常
                 await tools.sleep((memorycacheConfig.sync_wait_milisecond || 3000) * 2); //等待Nms
-                await syncSqliteDB(mysqlPool, metaDB); //同步主数据库数据到sqlite
+                await syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
             })();
             await tools.sleep((memorycacheConfig.sync_wait_milisecond || 3000) * 2); //等待Nms
         });

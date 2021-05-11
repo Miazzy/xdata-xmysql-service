@@ -67,6 +67,7 @@ module.exports = () => {
     };
 
     config.service = {
+        type: 'mysql',
         host: '172.18.254.95', // 172.18.254.95 222.212.88.72 hostname of database / localhost by default "-h, --host <n>"
         port: '39090', // port number for mysql / 3306 by default "-o, --port <n>"
         user: 'zhaoziyun', // username of database / root by default "-u, --user <n>"
@@ -83,7 +84,7 @@ module.exports = () => {
         useCpuCores: '0', // use number of CPU cores (using cluster) / 1 by default "-c, --useCpuCores <n>"
         commonCacheTime: 1,
         dblitepath: './database/db.sqlite.db',
-        sqlitepath: './database/db.sqlite.db',
+        sqlitepath: './database/[type].[database].[tablename].sqlite.db', // [database].[tablename].sqlite.db
     };
 
     config.slaves = {
