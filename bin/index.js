@@ -27,6 +27,7 @@ const config = require('./config/config');
 const tools = require('../lib/tools/tools').tools;
 const cache = require('../lib/cache/cache');
 const lock = require('../lib/lock/redisLock');
+const middlewareNacos = require('../lib/middleware/nacos');
 const filesystem = require('../lib/filesystem/filesystem');
 const sqlitetask = require('../lib/database/sqlite/sqlitetask');
 const sqlitePath = `${process.cwd()}/` + config().service.dblitepath;
@@ -36,38 +37,7 @@ const memoryDB = dblite(':memory:');
 const port = config().service.portNumber || 3000;
 const databaseMap = new Map();
 const logger = console;
-sqlite3.verbose(); // console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
 
-/**
- * Nacos配置注册服务中间件（注册微服务）
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
- */
-const middlewareNacos = async(req, res, next) => {
-    let rpcregistry = null;
-    try {
-        const nacosConfig = config().nacos;
-        const serviceConfig = config().service;
-        const ipAddress = tools.getIpAddress();
-        const client = new nacos.NacosNamingClient(nacosConfig);
-        const serviceName = serviceConfig.debug ? nacosConfig.debugServiceName : (serviceConfig.readOnly ? nacosConfig.readOnlyServiceName : nacosConfig.serviceName);
-        if (!nacosConfig.registStatus) {
-            return { client: null, rpcserver: null, rpcclient: null, config: nacosConfig, nacosConfig, zookeeperRegistry: null, serviceConfig, ipAddress, serviceName, sofaInterfaceName: nacosConfig.sofaInterfaceName };
-        } else {
-            //通过Nacos注册xdata-xmysql-service的RestAPI微服务
-            await client.ready();
-            await client.registerInstance(serviceName, { ip: ipAddress, port: serviceConfig.portNumber || port, });
-            //通过Zookeeper注册xdata.xmysql.service的rpc微服务 sofaRegistryName为none，不使用zookeeper注册中心
-            rpcregistry = nacosConfig.sofaRegistryName == 'none' ? null : new ZookeeperRegistry({ logger, address: nacosConfig.sofaZookeeperAddress, }); // 1. 创建 zk 注册中心客户端
-            const rpcserver = new RpcServer({ logger, registry: rpcregistry, port: nacosConfig.sofaRpcPort, }); // 2. 创建 RPC Server 实例
-            const rpcclient = new RpcClient({ logger, });
-            return { client, rpcserver, rpcclient, config: nacosConfig, nacosConfig, zookeeperRegistry: rpcregistry, serviceConfig, ipAddress, serviceName, sofaInterfaceName: nacosConfig.sofaInterfaceName };
-        }
-    } catch (error) {
-        console.log(error);
-    }
-}
 
 /**
  * Express服务启动函数
@@ -81,7 +51,7 @@ const startXmysql = async(sqlConfig) => {
     const memorycacheConfig = config().memorycache; //获取分布式数据库信息
     const version = config().memorycache.version;
     const schedule_task_time = config().memorycache.schedule_task_time;
-    const nacosMiddleware = await middlewareNacos(); //注册Nacos并发布服务，服务名称：xdata-xmysql-service
+    const nacosMiddleware = await middlewareNacos.middlewareNacos(); //注册Nacos并发布服务，服务名称：xdata-xmysql-service
     const rpcserver = nacosMiddleware.rpcserver; //获取 RPC Server
     const sqliteDBMap = await sqlitetask.openSQLiteDB(new Map()); //获取sqliteDB实例
     const init_wait_milisecond = memorycacheConfig.init_wait_milisecond;
