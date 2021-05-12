@@ -2,7 +2,6 @@
 
 ## Why this ?
 
-
 - 1. 快速生成MySQL数据库的RestAPI
 - 2. MySQL数据库的所有表可以全量和增量同步至本地sqlite数据库，sqlite可以根据主数据库的规模选择分片。
 - 3. 本地sqlite通过定时同步，或者解析MySQL—binlog数据库，保持与主数据库数据一致；同时会循环查询数据，检查不一致的数据，并将数据持久化到本地sqlite中。
