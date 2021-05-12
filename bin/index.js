@@ -116,21 +116,31 @@ const startXmysql = async(sqlConfig) => {
         // 启动本地sqlite，创建表，执行同步语句
         lock.lockExec(`app:start_sqlite_db:${ipaddress}:${version}:lock`, async() => {
             await (async() => {
-                await tools.sleep(init_wait_milisecond || 100); //等待Nms
-                const metaDB = moreApis.getXSQL().getMetaDB();
-                await sqlitetask.initSqliteDB(mysqlPool, metaDB, sqliteDBMap); //启动Sqlite本地缓存 进行两次建表初始化操作，避免写入操作时出现表不存在的异常
-                await tools.sleep((sync_wait_milisecond || 3000)); //等待Nms
-                await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
+                try {
+                    await tools.sleep(init_wait_milisecond || 100); //等待Nms
+                    const metaDB = moreApis.getXSQL().getMetaDB();
+                    console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
+                    await sqlitetask.initSqliteDB(mysqlPool, metaDB, sqliteDBMap); //启动Sqlite本地缓存 进行两次建表初始化操作，避免写入操作时出现表不存在的异常
+                    await tools.sleep((sync_wait_milisecond || 3000)); //等待Nms
+                    await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
+                } catch (error) {
+                    console.error(`app:start_sqlite_db:${ipaddress}:${version}:lock error`, error);
+                }
             })();
             await tools.sleep((sync_wait_milisecond || 3000)); //等待Nms
         });
         const task = schedule.scheduleJob(schedule_task_time, function() {
             lock.lockExec(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock`, async() => {
                 await (async() => {
-                    const mysqlPool = databaseMap.get('mysql_pool_info');
-                    const metaDB = moreApis.getXSQL().getMetaDB();
-                    const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap();
-                    await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
+                    try {
+                        const mysqlPool = databaseMap.get('mysql_pool_info');
+                        const metaDB = moreApis.getXSQL().getMetaDB();
+                        const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap();
+                        console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
+                        await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
+                    } catch (error) {
+                        console.error(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock error`, error);
+                    }
                 })();
                 console.log(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock exec over ... `);
             });
