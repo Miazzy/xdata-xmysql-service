@@ -105,6 +105,7 @@ const startXmysql = async(sqlConfig) => {
                 console.log(`schedule task not start and flag is `, schedule_task_flag);
                 return false;
             }
+            console.log(`start exec schedule task ... `);
             lock.lockExec(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock`, async() => {
                 // await (async() => {
                 //     try {
