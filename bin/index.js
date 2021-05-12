@@ -51,7 +51,7 @@ const startXmysql = async(sqlConfig) => {
     const memorycacheConfig = config().memorycache; //获取分布式数据库信息
     const version = config().memorycache.version;
     const schedule_task_time = config().memorycache.schedule_task_time;
-    const nacosMiddleware = await middlewareNacos.middlewareNacos(); //注册Nacos并发布服务，服务名称：xdata-xmysql-service
+    const nacosMiddleware = await middlewareNacos.register(); //注册Nacos并发布服务，服务名称：xdata-xmysql-service
     const rpcserver = nacosMiddleware.rpcserver; //获取 RPC Server
     const sqliteDBMap = await sqlitetask.openSQLiteDB(new Map()); //获取sqliteDB实例
     const init_wait_milisecond = memorycacheConfig.init_wait_milisecond;
@@ -161,7 +161,6 @@ const startXmysql = async(sqlConfig) => {
         rpcConsumeMap.set('local.ipaddress', tools.getIpAddress());
         moreApis.mysql.setRpcConsumeMap(rpcConsumeMap);
     }
-
 }
 
 /**
