@@ -84,7 +84,7 @@ const startXmysql = async(sqlConfig) => {
     const schedule_task_time = config().memorycache.schedule_task_time;
     const nacosMiddleware = await middlewareNacos(); //注册Nacos并发布服务，服务名称：xdata-xmysql-service
     const rpcserver = nacosMiddleware.rpcserver; //获取 RPC Server
-    const sqliteDBMap = await sqlitetask.openSQLiteDB(sqliteDBMap); //获取sqliteDB实例
+    const sqliteDBMap = await sqlitetask.openSQLiteDB(new Map()); //获取sqliteDB实例
 
     //设置express 
     const app = express();
