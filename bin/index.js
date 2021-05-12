@@ -107,17 +107,21 @@ const startXmysql = async(sqlConfig) => {
             }
             console.log(`start exec schedule task ... `);
             lock.lockExec(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock`, async() => {
-                // await (async() => {
-                //     try {
-                //         const mysqlPool = databaseMap.get('mysql_pool_info');
-                //         const metaDB = moreApis.getXSQL().getMetaDB();
-                //         const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap();
-                //         console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
-                //         await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
-                //     } catch (error) {
-                //         console.error(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock error`, error);
-                //     }
-                // })();
+                if (!schedule_task_flag) { //未启动定时同步
+                    console.log(`schedule task not start and flag is `, schedule_task_flag);
+                } else {
+                    await (async() => {
+                        try {
+                            const mysqlPool = databaseMap.get('mysql_pool_info');
+                            const metaDB = moreApis.getXSQL().getMetaDB();
+                            const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap();
+                            console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
+                            await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
+                        } catch (error) {
+                            console.error(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock error`, error);
+                        }
+                    })();
+                }
                 console.log(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock exec over ... `);
             });
         });
