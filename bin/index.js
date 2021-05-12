@@ -107,9 +107,7 @@ const startXmysql = async(sqlConfig) => {
             }
             console.log(`start exec schedule task ... `);
             lock.lockExec(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock`, async() => {
-                if (!schedule_task_flag) { //未启动定时同步
-                    console.log(`schedule task not start and flag is `, schedule_task_flag);
-                } else {
+                if (schedule_task_flag) { //未启动定时同步
                     await (async() => {
                         try {
                             const mysqlPool = databaseMap.get('mysql_pool_info');
