@@ -34,7 +34,6 @@ const sqliteFile = `${process.cwd()}/` + config().service.sqlitepath;
 const sqliteDB = dblite(sqlitePath);
 const memoryDB = dblite(':memory:');
 const port = config().service.portNumber || 3000;
-const sqliteDBMap = new Map();
 const databaseMap = new Map();
 const logger = console;
 sqlite3.verbose(); // console.log(`dblitepath:`, sqlitePath, ` server start port:`, port);
@@ -85,6 +84,8 @@ const startXmysql = async(sqlConfig) => {
     const nacosMiddleware = await middlewareNacos(); //注册Nacos并发布服务，服务名称：xdata-xmysql-service
     const rpcserver = nacosMiddleware.rpcserver; //获取 RPC Server
     const sqliteDBMap = await sqlitetask.openSQLiteDB(new Map()); //获取sqliteDB实例
+    const init_wait_milisecond = memorycacheConfig.init_wait_milisecond;
+    const sync_wait_milisecond = memorycacheConfig.sync_wait_milisecond;
 
     //设置express 
     const app = express();
@@ -115,14 +116,14 @@ const startXmysql = async(sqlConfig) => {
         // 启动本地sqlite，创建表，执行同步语句
         lock.lockExec(`app:start_sqlite_db:${ipaddress}:${version}:lock`, async() => {
             await (async() => {
-                await tools.sleep(memorycacheConfig.init_wait_milisecond || 100); //等待Nms
+                await tools.sleep(init_wait_milisecond || 100); //等待Nms
                 const metaDB = moreApis.getXSQL().getMetaDB();
                 databaseMap.set('meta_db_info', metaDB);
                 await sqlitetask.initSqliteDB(mysqlPool, metaDB, sqliteDBMap); //启动Sqlite本地缓存 进行两次建表初始化操作，避免写入操作时出现表不存在的异常
-                await tools.sleep((memorycacheConfig.sync_wait_milisecond || 3000)); //等待Nms
+                await tools.sleep((sync_wait_milisecond || 3000)); //等待Nms
                 await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
             })();
-            await tools.sleep((memorycacheConfig.sync_wait_milisecond || 3000)); //等待Nms
+            await tools.sleep((sync_wait_milisecond || 3000)); //等待Nms
         });
         const task = schedule.scheduleJob(schedule_task_time, function() {
             lock.lockExec(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock`, async() => {
