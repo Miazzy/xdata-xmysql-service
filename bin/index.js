@@ -102,6 +102,7 @@ const startXmysql = async(sqlConfig) => {
         });
         const task = schedule.scheduleJob(schedule_task_time, function() {
             if (!schedule_task_flag) { //未启动定时同步
+                console.log(`schedule task not start and flag is `, schedule_task_flag);
                 return false;
             }
             lock.lockExec(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock`, async() => {
