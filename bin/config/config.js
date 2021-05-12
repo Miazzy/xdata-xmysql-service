@@ -263,7 +263,6 @@ module.exports = () => {
             'pr_business_status': '',
             'pr_businesses': '',
             'pr_collection': '',
-            'pr_database_log': '',
             'pr_design': '',
             'pr_flow': '',
             'pr_log': '',
