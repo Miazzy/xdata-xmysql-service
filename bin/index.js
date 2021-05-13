@@ -53,6 +53,7 @@ const startXmysql = async(sqlConfig) => {
     const memorycacheConfig = config().memorycache; //获取分布式数据库信息
     const version = config().memorycache.version;
     const schedule_task_time = config().memorycache.schedule_task_time;
+    const schedule_hour_time = config().memorycache.schedule_hour_time;
     const schedule_task_flag = config().memorycache.schedule_task_flag;
     const nacosMiddleware = await middlewareNacos.register(); //注册Nacos并发布服务，服务名称：xdata-xmysql-service
     const rpcserver = nacosMiddleware.rpcserver; //获取 RPC Server
@@ -102,12 +103,11 @@ const startXmysql = async(sqlConfig) => {
             })();
             await tools.sleep((sync_wait_milisecond || 3000)); //等待Nms
         });
-        const task = schedule.scheduleJob(schedule_task_time, function() {
+        const minTask = schedule.scheduleJob(schedule_task_time, function() {
             if (!schedule_task_flag) { //未启动定时同步
                 console.log(`schedule task not start and flag is `, schedule_task_flag);
                 return false;
-            }
-            // console.log(`start exec schedule task ... `);
+            } // console.log(`start exec schedule task ... `);
             lock.lockExec(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock`, async() => {
                 if (schedule_task_flag) { //未启动定时同步
                     await (async() => {
@@ -117,6 +117,28 @@ const startXmysql = async(sqlConfig) => {
                             const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap();
                             // console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
                             await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
+                        } catch (error) {
+                            console.error(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock error`, error);
+                        }
+                    })();
+                }
+                console.log(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock exec over ... `);
+            });
+        });
+        const maxTask = schedule.scheduleJob(schedule_hour_time, function() {
+            if (!schedule_task_flag) { //未启动定时同步
+                console.log(`schedule task not start and flag is `, schedule_task_flag);
+                return false;
+            } // console.log(`start exec schedule task ... `);
+            lock.lockExec(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock`, async() => {
+                if (schedule_task_flag) { //未启动定时同步
+                    await (async() => {
+                        try {
+                            const mysqlPool = databaseMap.get('mysql_pool_info');
+                            const metaDB = moreApis.getXSQL().getMetaDB();
+                            const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap();
+                            // console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
+                            await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap, true); //同步主数据库数据到sqlite
                         } catch (error) {
                             console.error(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock error`, error);
                         }
