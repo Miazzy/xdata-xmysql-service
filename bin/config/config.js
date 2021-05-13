@@ -108,7 +108,7 @@ module.exports = () => {
         init_wait_milisecond: 100,
         sync_wait_milisecond: 3000,
         sync_interval_milisecond: 100,
-        schedule_task_time: '*/30 * * * * *', //全量增量同步定时任务 
+        schedule_task_time: '0 */3 * * * *', //全量增量同步定时任务 
         schedule_task_flag: true, //是否启动定时同步
         batch_num: 1,
         ddl_sqlite_flag: false,
@@ -119,17 +119,8 @@ module.exports = () => {
             'bs_seal_regist_finance': '',
             'bs_goods_receive': '',
             'bs_goods_borrow': '',
-            'bs_company_flow': '',
-            'bs_company_flow_alteration': '',
             'bs_company_flow_base': '',
             'bs_company_flow_data': '',
-            'bs_company_flow_inc': '',
-            'bs_company_flow_link': '',
-            'bs_company_flow_manager': '',
-            'bs_company_flow_pledge': '',
-            'bs_company_flow_qualification': '',
-            'bs_company_flow_report': '',
-            'bs_company_flow_stock': '',
         },
     };
 
