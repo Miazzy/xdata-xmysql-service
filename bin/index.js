@@ -14,8 +14,6 @@ const protect = require('@risingstack/protect');
 const sqlConfig = require("commander");
 const mysql = require("mysql");
 const cors = require("cors");
-const Xapi = require("../lib/xapi.js");
-const cmdargs = require("../lib/util/cmd.js");
 const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
 const requestIp = require('request-ip');
@@ -23,7 +21,10 @@ const nacos = require('nacos');
 const schedule = require('node-schedule');
 const os = require('os');
 const fs = require('fs');
+const xprofiler = require('xprofiler');
 const config = require('./config/config');
+const Xapi = require("../lib/xapi.js");
+const cmdargs = require("../lib/util/cmd.js");
 const tools = require('../lib/tools/tools').tools;
 const cache = require('../lib/cache/cache');
 const lock = require('../lib/lock/redisLock');
@@ -38,6 +39,7 @@ const port = config().service.portNumber || 3000;
 const databaseMap = new Map();
 const logger = console;
 
+xprofiler.start();
 
 /**
  * Express服务启动函数
