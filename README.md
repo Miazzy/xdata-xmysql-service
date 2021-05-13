@@ -38,11 +38,10 @@ npm run start
 * Serves APIs irrespective of naming conventions of primary keys, foreign keys, tables etc :fire::fire:
 * Support for composite primary keys :fire::fire:
 * REST API Usual suspects : CRUD, List, FindOne, Count, Exists, Distinct
-* Bulk insert, Bulk delete, Bulk read :fire:   
-* Relations
-* Pagination 
-* Sorting
-* Column filtering - Fields :fire:  
+* 批量插入、批量读取、批量删除、批量修改
+* 分页查询 
+* 排序查询
+* 字段筛选
 * Row filtering - Where :fire:
 * Aggregate functions
 * Group By, Having (as query params) :fire::fire:  
@@ -51,16 +50,6 @@ npm run start
 * Chart API for numeric column :fire::fire::fire::fire::fire::fire:
 * Auto Chart API - (a gift for lazy while prototyping) :fire::fire::fire::fire::fire::fire:
 * [XJOIN - (Supports any number of JOINS)](#xjoin) :fire::fire::fire::fire::fire::fire::fire::fire::fire:
-* Supports views  
-* Prototyping (features available when using local MySql server only)
-    * Run dynamic queries :fire::fire::fire:
-    * Upload single file
-    * Upload multiple files
-    * Download file
-* Health and version apis
-* Use more than one CPU Cores
-* [Docker support](#docker) and [Nginx reverse proxy config](#nginx-reverse-proxy-config-with-docker) :fire::fire::fire: - Thanks to [@markuman](https://github.com/markuman)  
-* AWS Lambda Example - Thanks to [@bertyhell](https://github.com/bertyhell) :fire::fire::fire:
 
 1. 自动生成建表语句 xdata-xmysql-service sqlite3。 √
 2. 查询数据，使用sqlite作为缓存，先查询sqlite，如果sqlite存在，则直接返回。 ×
