@@ -38,11 +38,11 @@ npm run start
 * Serves APIs irrespective of naming conventions of primary keys, foreign keys, tables etc :fire::fire:
 * Support for composite primary keys :fire::fire:
 * REST API Usual suspects : CRUD, List, FindOne, Count, Exists, Distinct
-* 批量插入、批量读取、批量删除、批量修改
-* 分页查询 
-* 排序查询
-* 字段筛选
-* Row filtering - Where :fire:
+* 支持批量插入、批量读取、批量删除、批量修改
+* 支持分页查询 
+* 支持排序查询
+* 支持字段筛选
+* 支持查询条件
 * Aggregate functions
 * Group By, Having (as query params) :fire::fire:  
 * Group By, Having (as a separate API) :fire::fire:  
