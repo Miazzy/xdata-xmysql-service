@@ -89,7 +89,7 @@ module.exports = () => {
         apiPrefix: '', // api url prefix / "/api/" by default "-a, --apiPrefix <n>"
         debug: false, // 是否开启调试模式
         readOnly: false, // readonly apis / false by default "-y, --readOnly"
-        useCpuCores: '1', // use number of CPU cores (using cluster) / 1 by default "-c, --useCpuCores <n>" 慎用 启动进程数 最好不要太大 进程间通信得用分布式锁防止并发处理
+        useCpuCores: '2', // use number of CPU cores (using cluster) / 1 by default "-c, --useCpuCores <n>" 慎用 启动进程数 最好不要太大 进程间通信得用分布式锁防止并发处理
         commonCacheTime: 1,
         dblitepath: './database/db.sqlite.db',
         sqlitepath: './database/{type}.{database}.{tablename}.sqlite.db', // [database].[tablename].sqlite.db
