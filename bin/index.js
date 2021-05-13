@@ -92,8 +92,7 @@ const startXmysql = async(sqlConfig) => {
             await (async() => {
                 try {
                     await tools.sleep(init_wait_milisecond || 100); //等待Nms
-                    const metaDB = moreApis.getXSQL().getMetaDB();
-                    // console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
+                    const metaDB = moreApis.getXSQL().getMetaDB(); // console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
                     await sqlitetask.initSqliteDB(mysqlPool, metaDB, sqliteDBMap); //启动Sqlite本地缓存 进行两次建表初始化操作，避免写入操作时出现表不存在的异常
                     await tools.sleep((sync_wait_milisecond || 3000)); //等待Nms
                     await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
