@@ -38,9 +38,9 @@ module.exports = () => {
     };
 
     config.redislock = {
-        timeout: 300000,
-        retries: 100,
-        delay: 3000,
+        timeout: 1000,
+        retries: 3,
+        delay: 300,
     };
 
     config.redisclustr = {
