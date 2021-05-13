@@ -11,7 +11,7 @@
 - 7. 除本地sqlite以外，为提供ops,所有数据同步持久化为文档数据（非关系性，不提供事务），所有SQL查询，可以解析为特定参数查询函数，查询函数在文档数据中快速查询，由于没有sqlite的制约，在查询特定类型数据时，可能提供更大ops，数据同步通过类似raft协议来保持一致。
 - 8. MySQL数据库，可以同时同步在mysql/postgres/oracle/sqlserver，作为一款自动的数据迁移工具。
 - 9. MySQL数据库，在同步到sqlite时，会根据MySQL数据库表的信息，自动生成建表语句，但表必须有主键，另外如果表字段为特殊字符串，如database，则生成的DDL可能无法在sqlite中执行。
-- 10. 本服务的目标是 
+- 10. 本服务的目标是: <br/> 
   ①提供MySQL的RestAPI。<br/>
   ②提供MySQL的本地sqlite备份。<br/>
   ③同步完成后的sqlite可以提供快速查询功能，缓解MySQL的压力。<br/>
