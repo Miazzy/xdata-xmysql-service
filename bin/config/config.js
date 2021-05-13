@@ -66,6 +66,14 @@ module.exports = () => {
         xss: true,
     };
 
+    config.xprofiler = {
+        log_dir: './logs', // 性能分析日志输出目录
+        log_interval: 120, // 采样间隔 120s
+        enable_log_uv_handles: false, // 不输出 uv 句柄分类详情
+        log_format_alinode: true, // 以 alinode 的格式输出日志
+        log_level: 1 // 只输出 info 日志
+    };
+
     config.service = {
         type: 'mysql',
         host: '172.18.254.95', // 172.18.254.95 222.212.88.72 hostname of database / localhost by default "-h, --host <n>"
