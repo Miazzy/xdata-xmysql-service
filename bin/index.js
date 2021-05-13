@@ -92,7 +92,7 @@ const startXmysql = async(sqlConfig) => {
                 try {
                     await tools.sleep(init_wait_milisecond || 100); //等待Nms
                     const metaDB = moreApis.getXSQL().getMetaDB();
-                    console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
+                    // console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
                     await sqlitetask.initSqliteDB(mysqlPool, metaDB, sqliteDBMap); //启动Sqlite本地缓存 进行两次建表初始化操作，避免写入操作时出现表不存在的异常
                     await tools.sleep((sync_wait_milisecond || 3000)); //等待Nms
                     await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
@@ -107,7 +107,7 @@ const startXmysql = async(sqlConfig) => {
                 console.log(`schedule task not start and flag is `, schedule_task_flag);
                 return false;
             }
-            console.log(`start exec schedule task ... `);
+            // console.log(`start exec schedule task ... `);
             lock.lockExec(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock`, async() => {
                 if (schedule_task_flag) { //未启动定时同步
                     await (async() => {
@@ -115,7 +115,7 @@ const startXmysql = async(sqlConfig) => {
                             const mysqlPool = databaseMap.get('mysql_pool_info');
                             const metaDB = moreApis.getXSQL().getMetaDB();
                             const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap();
-                            console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
+                            // console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
                             await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
                         } catch (error) {
                             console.error(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock error`, error);
@@ -155,7 +155,7 @@ const startXmysql = async(sqlConfig) => {
 
         //获取Nacos注册列表
         nacosClient.subscribe(nacosConfig.serviceName, hosts => {
-            console.log(nacosConfig.serviceName, ` targets: `, hosts);
+            // console.log(nacosConfig.serviceName, ` targets: `, hosts);
             for (const target of hosts) { // 选出健康的targets;
                 if (!(target.valid && target.healthy && target.enabled)) {
                     continue;
@@ -181,15 +181,15 @@ const start = async(sqlConfig) => {
     try {
         cmdargs.handle(sqlConfig); //handle cmd line arguments
         if (cluster.isMaster && sqlConfig.useCpuCores > 1) {
-            console.log(`Master ${process.pid} is running`);
+            // console.log(`Master ${process.pid} is running`);
 
             for (let i = 0; i < numCPUs && i < sqlConfig.useCpuCores; i++) {
-                console.log(`Forking process number ${i}...`);
+                // console.log(`Forking process number ${i}...`);
                 cluster.fork();
             }
 
             cluster.on("exit", function(worker, code, signal) {
-                console.log("Starting a new worker", `Cause, Worker ${worker.process.pid} died with code: ${code} , and signal: ${signal} `);
+                // console.log("Starting a new worker", `Cause, Worker ${worker.process.pid} died with code: ${code} , and signal: ${signal} `);
                 cluster.fork();
             });
         } else {
