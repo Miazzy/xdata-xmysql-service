@@ -114,8 +114,7 @@ const startXmysql = async(sqlConfig) => {
                         try {
                             const mysqlPool = databaseMap.get('mysql_pool_info');
                             const metaDB = moreApis.getXSQL().getMetaDB();
-                            const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap();
-                            // console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
+                            const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap(); // console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
                             await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap); //同步主数据库数据到sqlite
                         } catch (error) {
                             console.error(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock error`, error);
@@ -136,8 +135,7 @@ const startXmysql = async(sqlConfig) => {
                         try {
                             const mysqlPool = databaseMap.get('mysql_pool_info');
                             const metaDB = moreApis.getXSQL().getMetaDB();
-                            const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap();
-                            // console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
+                            const sqliteDBMap = moreApis.getXSQL().getSQLiteDBMap(); // console.info(`app:start_sqlite_db:${ipaddress}:${version}:lock pool:`, mysqlPool, ` metaDB:`, metaDB, ` sqliteDBMap:`, sqliteDBMap);
                             await sqlitetask.syncSqliteDB(mysqlPool, metaDB, sqliteDBMap, true); //同步主数据库数据到sqlite
                         } catch (error) {
                             console.error(`app:start_sqlite_inc_schedule_db:${ipaddress}:${version}:lock error`, error);
