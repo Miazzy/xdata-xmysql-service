@@ -180,16 +180,11 @@ const startXmysql = async(sqlConfig) => {
 const start = async(sqlConfig) => {
     try {
         cmdargs.handle(sqlConfig); //handle cmd line arguments
-        if (cluster.isMaster && sqlConfig.useCpuCores > 1) {
-            // console.log(`Master ${process.pid} is running`);
-
-            for (let i = 0; i < numCPUs && i < sqlConfig.useCpuCores; i++) {
-                // console.log(`Forking process number ${i}...`);
+        if (cluster.isMaster && sqlConfig.useCpuCores > 1) { // console.log(`Master ${process.pid} is running`);
+            for (let i = 0; i < numCPUs && i < sqlConfig.useCpuCores; i++) { // console.log(`Forking process number ${i}...`);
                 cluster.fork();
             }
-
-            cluster.on("exit", function(worker, code, signal) {
-                // console.log("Starting a new worker", `Cause, Worker ${worker.process.pid} died with code: ${code} , and signal: ${signal} `);
+            cluster.on("exit", function(worker, code, signal) { // console.log("Starting a new worker", `Cause, Worker ${worker.process.pid} died with code: ${code} , and signal: ${signal} `);
                 cluster.fork();
             });
         } else {
