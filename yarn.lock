@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@mapbox/node-pre-gyp@^1.0.4":
-  "integrity" "sha512-4srsKPXWlIxp5Vbqz5uLfBN+du2fJChBoYn/f2h991WLdk7jUvcSk/McVLSv/X+xQIPI8eGD5GjrnygdyHnhPA=="
-  "resolved" "https://registry.npmjs.org/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.5.tgz"
+"@mapbox/node-pre-gyp@^1.0.4", "@mapbox/node-pre-gyp@^1.0.5":
+  "integrity" "sha1-Kgsy/LQW+z8iUP0kyyqBQhpPWVA="
+  "resolved" "https://registry.nlark.com/@mapbox/node-pre-gyp/download/@mapbox/node-pre-gyp-1.0.5.tgz?cache=0&sync_timestamp=1620709498988&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40mapbox%2Fnode-pre-gyp%2Fdownload%2F%40mapbox%2Fnode-pre-gyp-1.0.5.tgz"
   "version" "1.0.5"
   dependencies:
     "detect-libc" "^1.0.3"
@@ -874,7 +874,6 @@
   "version" "1.1.1"
   dependencies:
     "ansi-regex" "^3.0.0"
-    "wcwidth" ">=1.0.1"
   optionalDependencies:
     "wcwidth" ">=1.0.1"
 
@@ -985,7 +984,6 @@
     "estraverse" "^4.2.0"
     "esutils" "^2.0.2"
     "optionator" "^0.8.1"
-    "source-map" "~0.6.1"
   optionalDependencies:
     "source-map" "~0.6.1"
 
@@ -3189,7 +3187,6 @@
   "version" "5.0.2"
   dependencies:
     "node-addon-api" "^3.0.0"
-    "node-gyp" "3.x"
     "node-pre-gyp" "^0.11.0"
   optionalDependencies:
     "node-gyp" "3.x"
