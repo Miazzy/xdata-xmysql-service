@@ -36,7 +36,6 @@ npm run start
 ## Features
 * Generates API for **ANY** MySql database :fire::fire:
 * Serves APIs irrespective of naming conventions of primary keys, foreign keys, tables etc :fire::fire:
-* Support for composite primary keys :fire::fire:
 * REST API Usual suspects : CRUD, List, FindOne, Count, Exists, Distinct
 * 支持批量插入、批量读取、批量删除、批量修改
 * 支持分页查询 
