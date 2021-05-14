@@ -114,6 +114,7 @@ module.exports = () => {
         batch_num: 1,
         ddl_sqlite_flag: false,
         trace_sql_flag: false,
+        cache_sqlite_query: false,
         cacheddl: {
             'bs_seal_regist': '',
             'bs_seal_regist_archive': '',
