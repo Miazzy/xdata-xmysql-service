@@ -109,7 +109,7 @@ module.exports = () => {
         sync_wait_milisecond: 3000,
         sync_interval_milisecond: 100,
         schedule_task_time: '0 */3 * * * *', //全量增量同步定时任务 
-        schedule_hour_time: '0 */1000 * * * *', //全量增量同步定时任务 
+        schedule_hour_time: '0 */1500 * * * *', //全量增量同步定时任务 
         schedule_task_flag: true, //是否启动定时同步
         batch_num: 1,
         ddl_sqlite_flag: false,
