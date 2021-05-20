@@ -38,7 +38,6 @@ const memoryDB = dblite(':memory:');
 const port = config().service.portNumber || 3000;
 const databaseMap = new Map();
 const logger = console;
-
 // xprofiler.start();
 
 /**
