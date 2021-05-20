@@ -116,13 +116,8 @@ module.exports = () => {
         trace_sql_flag: false,
         cache_sqlite_query: false,
         cacheddl: {
-            'bs_seal_regist': '',
-            'bs_seal_regist_archive': '',
-            'bs_seal_regist_finance': '',
             'bs_goods_receive': '',
             'bs_goods_borrow': '',
-            'bs_company_flow_base': '',
-            'bs_company_flow_data': '',
         },
     };
 
