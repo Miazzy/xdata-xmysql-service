@@ -108,7 +108,7 @@ module.exports = () => {
         init_wait_milisecond: 100,
         sync_wait_milisecond: 3000,
         sync_interval_milisecond: 100,
-        schedule_task_time: '0 */100 * * * *', //全量增量同步定时任务 
+        schedule_task_time: '0 */1000 * * * *', //全量增量同步定时任务 
         schedule_hour_time: '0 */150000 * * * *', //全量增量同步定时任务 
         schedule_task_flag: true, //是否启动定时同步
         batch_num: 1,
