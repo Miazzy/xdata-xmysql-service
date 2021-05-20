@@ -21,7 +21,7 @@ const nacos = require('nacos');
 const schedule = require('node-schedule');
 const os = require('os');
 const fs = require('fs');
-const xprofiler = require('xprofiler');
+// const xprofiler = require('xprofiler');
 const config = require('./config/config');
 const Xapi = require("../lib/xapi.js");
 const cmdargs = require("../lib/util/cmd.js");
@@ -39,7 +39,7 @@ const port = config().service.portNumber || 3000;
 const databaseMap = new Map();
 const logger = console;
 
-xprofiler.start();
+// xprofiler.start();
 
 /**
  * Express服务启动函数
