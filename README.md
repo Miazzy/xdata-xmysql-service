@@ -65,3 +65,21 @@ npm run start
 13. 定时检测本地sqlite 与 远程 mysql 数据库表 长度 是否一致，以及抽样调查最近一段时间数据是否一致，如果一致，则设置此表为一致，查询请求，可以先由本地一致标识的数据库返回数据。×
 14. 本地sqlite定期执行bin_log解析SQL，保证一致性，如果需要新增数据，直接新增，如果遇到修改数据，则查询主数据库数据，在将主数据库数据更新到本地，如果遇到删除，查询主数据库数据，如果主数据库数据此数据不存在，则删除本地sqlite对应数据。×
 15. 初始化同步时，应该10000条的多批次查询，按批次将数据刷入到sqlite中，如果不这样数据量大于100000级，数据时查询不出来的，而且也难以同时就数据持久化到sqlite中。×
+
+
+```js
+XDATA用印数据区域名称刷新 https://api.yunwisdom.club:30443/gateway/api/v2/mysql/updata_zonename
+XDATA同步考勤数据 https://api.yunwisdom.club:30443/gateway/api/v1/datasync_schedule_sign
+XDATA备份MySQL数据库 https://api.yunwisdom.club:30443/gateway/api/v3/mysql/backup
+XDATA同步HRMRESOURCE https://api.yunwisdom.club:30443/gateway/api/v1/datasync
+XDATA刷新部门员工(创达) https://api.yunwisdom.club:30443/gateway/api/v1_cd/wework_depart_user/2/1
+XDATA刷新部门(创达) https://api.yunwisdom.club:30443/gateway/api/v1_cd/wework_depart/1
+XDATA刷新部门(创达) https://api.yunwisdom.club:30443/gateway/api/v1_cd/wework_depart_list/1
+MySQL用印数据定时刷新 https://api.yunwisdom.club:30443/gateway/api/v2/mysql/serial/update_seal_info
+XDATA刷新用户 https://api.yunwisdom.club:30443/gateway/api/v3/employee
+XDATA刷新部门 https://api.yunwisdom.club:30443/gateway/api/v2/wework_depart_list/2
+XDATA刷新部门 https://api.yunwisdom.club:30443/gateway/api/v2/wework_depart/2
+XDATA刷新部门员工 https://api.yunwisdom.club:30443/gateway/api/v2/wework_sdepart_user/2/1
+XDATA刷新部门员工 https://api.yunwisdom.club:30443/gateway/api/v2/wework_depart_user/2/1
+MySQL自动序列 https://api.yunwisdom.club:30443/gateway/api/v2/mysql/serial/bs_seal_regist/serialid/id
+```
