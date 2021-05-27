@@ -114,7 +114,7 @@ module.exports = () => {
         batch_num: 1,
         ddl_sqlite_flag: false,
         trace_sql_flag: false,
-        cache_sqlite_query: false,
+        cache_sqlite_query: true,
         cacheddl: {
             'bs_goods_receive': '',
             'bs_goods_borrow': '',
