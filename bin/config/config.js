@@ -13,11 +13,23 @@ module.exports = () => {
      * @type {Egg.EggAppConfig}
      **/
     const config = exports = {};
+    const nacosIP = 'nacos.yunwisdom.club'; // nacos IP地址 const nacosIP = '172.18.1.51';
+    const nacosList = [`${nacosIP}:30080`]; // const nacosList = [`${nacosIP}:8848`, `${nacosIP}:8849`, `${nacosIP}:8850`];
+
+    const redisIP = 'r-bp16338c31627a24pd.redis.rds.aliyuncs.com';
+    const redisPassword = 'Redis@password';
+    const redisPort = 6379;
+
+    const mysqlIP = '172.18.254.95';
+    const mysqlPort = '39090';
+    const mysqlAccount = 'zhaoziyun';
+    const mysqlPassword = 'ziyequma';
+    const mysqlDatabase = 'xdata';
 
     config.nacos = {
         registStatus: true,
         logger: console,
-        serverList: ['172.18.1.51:8848', '172.18.1.51:8849', '172.18.1.51:8850'], // replace to real nacos serverList
+        serverList: nacosList, // replace to real nacos serverList
         namespace: 'public',
         groupName: 'DEFAULT_GROUP',
         serviceName: 'xdata-xmysql-service', //正常模式
@@ -30,10 +42,10 @@ module.exports = () => {
     };
 
     config.redis = {
-        host: '172.18.254.95', // 127.0.0.1:6379 172.18.254.95:36379
-        port: 36379,
+        host: redisIP, // 127.0.0.1:6379 172.18.254.95:36379
+        port: redisPort,
+        password: redisPassword,
         family: 4, // 4 (IPv4) or 6 (IPv6)
-        password: "",
         db: 0,
     };
 
@@ -76,11 +88,11 @@ module.exports = () => {
 
     config.service = {
         type: 'mysql',
-        host: '172.18.254.95', // 172.18.254.95 222.212.88.72 hostname of database / localhost by default "-h, --host <n>"
-        port: '39090', // port number for mysql / 3306 by default "-o, --port <n>"
-        user: 'zhaoziyun', // username of database / root by default "-u, --user <n>"
-        password: 'ziyequma', // password of database / empty by default "-p, --password <n>"
-        database: 'xdata', // database schema name "-d, --database <n>"
+        host: mysqlIP, // 172.18.254.95 222.212.88.72 hostname of database / localhost by default "-h, --host <n>"
+        port: mysqlPort, // port number for mysql / 3306 by default "-o, --port <n>"
+        user: mysqlAccount, // username of database / root by default "-u, --user <n>"
+        password: mysqlPassword, // password of database / empty by default "-p, --password <n>"
+        database: mysqlDatabase, // database schema name "-d, --database <n>"
         ipAddress: '0.0.0.0', // IP interface of your server / localhost by default "-r, --ipAddress <n>"
         portNumber: '3000', // port number for app / 3000 by default "-n, --portNumber <n>"
         ignoreTables: '', // comma separated table names to ignore "-i, --ignoreTables <n>"
@@ -96,15 +108,15 @@ module.exports = () => {
     };
 
     config.slaves = {
-        host: '172.18.254.95', // hostname of database / localhost by default "-h, --host <n>"
-        port: '39090', // port number for mysql / 3306 by default "-o, --port <n>"
-        user: 'zhaoziyun', // username of database / root by default "-u, --user <n>"
-        password: 'ziyequma', // password of database / empty by default "-p, --password <n>"
+        host: mysqlIP, // hostname of database / localhost by default "-h, --host <n>"
+        port: mysqlPort, // port number for mysql / 3306 by default "-o, --port <n>"
+        user: mysqlAccount, // username of database / root by default "-u, --user <n>"
+        password: mysqlPassword, // password of database / empty by default "-p, --password <n>"
         database: 'xdata_slave', // database schema name "-d, --database <n>"
     };
 
     config.memorycache = {
-        version: 'v3.3.5',
+        version: 'v3.3.7',
         init_wait_milisecond: 100,
         sync_wait_milisecond: 3000,
         sync_interval_milisecond: 100,
